@@ -34,9 +34,8 @@ Este proyecto está desarrollado con tecnologías modernas y es accesible tanto 
 - ORM: **Hibernate**
 
 ### **Frontend**
-- Web: **Java (Framework web como Spring MVC o Thymeleaf)**.
-- Mobile: **React Native**.
-- Escritorio: **Java (Swing o JavaFX)**.
+- Web: **Java/React**.
+- Mobile: **Java/Kotlin**.
 
 ### **Integraciones**
 - **Mercado Pago API:** Para gestión de cobros.
