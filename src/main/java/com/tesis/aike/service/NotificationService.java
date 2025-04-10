@@ -12,13 +12,17 @@ import java.util.List;
 public class NotificationService {
 
     @Autowired
-    private NotificationsRepository notificationsRepository;
+    private static NotificationsRepository notificationsRepository;
 
-    public NotificationsEntity guardarNotificacion(NotificationsEntity notification) {
+    public static List<NotificationsEntity> obtenerTodasLasNotificaciones() {
+        return List.of();
+    }
+
+    public static NotificationsEntity guardarNotificacion(NotificationsEntity notification) {
         return notificationsRepository.save(notification);
     }
 
-    public NotificationsEntity obtenerNotificacionPorId(int id) {
+    public static NotificationsEntity obtenerNotificacionPorId(int id) {
         return notificationsRepository.findById(id).orElse(null);
     }
 
@@ -32,6 +36,9 @@ public class NotificationService {
         // Si agregaste el método personalizado findByReadFalse al repositorio
         // return notificationsRepository.findByReadFalse();
         return null; // Implementa la lógica si es necesario
+    }
+
+    public void eliminarNotificacion(int id) {
     }
 
     // ... otros métodos relacionados con las notificaciones

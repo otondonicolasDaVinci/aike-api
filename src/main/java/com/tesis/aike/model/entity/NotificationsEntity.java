@@ -77,4 +77,8 @@ public class NotificationsEntity {
     public int hashCode() {
         return Objects.hash(id, userId, message, read, createdAt);
     }
+
+    public boolean isPresent() {
+        return false;
+    }
 }

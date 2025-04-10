@@ -76,4 +76,8 @@ public class CabinsEntity {
     public int hashCode() {
         return Objects.hash(id, name, capacity, description, available);
     }
+
+    public boolean isPresent() {
+        return false;
+    }
 }

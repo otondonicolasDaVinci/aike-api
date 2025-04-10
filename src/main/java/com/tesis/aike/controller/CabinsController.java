@@ -25,7 +25,7 @@ public class CabinsController {
 
     @GetMapping("/{id}")
     public ResponseEntity<CabinsEntity> obtenerCabinaPorId(@PathVariable int id) {
-        Optional<CabinsEntity> cabin = cabinsService.obtenerCabinaPorId(id);
+        Optional<CabinsEntity> cabin = Optional.ofNullable(cabinsService.obtenerCabinaPorId(id));
         return cabin.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -38,7 +38,7 @@ public class CabinsController {
 
     @PutMapping("/{id}")
     public ResponseEntity<CabinsEntity> actualizarCabina(@PathVariable int id, @RequestBody CabinsEntity cabinActualizada) {
-        Optional<CabinsEntity> cabinExistente = cabinsService.obtenerCabinaPorId(id);
+        Optional<CabinsEntity> cabinExistente = Optional.ofNullable(cabinsService.obtenerCabinaPorId(id));
         if (cabinExistente.isPresent()) {
             cabinActualizada.setId(id);
             CabinsEntity cabinaActualizada = cabinsService.guardarCabina(cabinActualizada);

@@ -1,7 +1,7 @@
 package com.tesis.aike.controller; // Asegúrate de usar el paquete correcto para tus controladores
 
 import com.tesis.aike.model.entity.NotificationsEntity;
-import com.tesis.aike.service.NotificationsService; // Asegúrate de que la ruta a tu servicio sea correcta
+import com.tesis.aike.service.NotificationService; // Asegúrate de que la ruta a tu servicio sea correcta
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,33 +15,33 @@ import java.util.Optional;
 public class NotificationsController {
 
     @Autowired
-    private NotificationsService notificationsService;
+    private NotificationService notificationsService;
 
     @GetMapping
     public ResponseEntity<List<NotificationsEntity>> obtenerTodasLasNotificaciones() {
-        List<NotificationsEntity> notifications = notificationsService.obtenerTodasLasNotificaciones();
+        List<NotificationsEntity> notifications = NotificationService.obtenerTodasLasNotificaciones();
         return new ResponseEntity<>(notifications, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<NotificationsEntity> obtenerNotificacionPorId(@PathVariable int id) {
-        Optional<NotificationsEntity> notification = notificationsService.obtenerNotificacionPorId(id);
+        Optional<NotificationsEntity> notification = Optional.ofNullable(NotificationService.obtenerNotificacionPorId(id));
         return notification.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping
     public ResponseEntity<NotificationsEntity> crearNotificacion(@RequestBody NotificationsEntity notification) {
-        NotificationsEntity nuevaNotificacion = notificationsService.guardarNotificacion(notification);
+        NotificationsEntity nuevaNotificacion = NotificationService.guardarNotificacion(notification);
         return new ResponseEntity<>(nuevaNotificacion, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<NotificationsEntity> actualizarNotificacion(@PathVariable int id, @RequestBody NotificationsEntity notificationActualizada) {
-        Optional<NotificationsEntity> notificationExistente = notificationsService.obtenerNotificacionPorId(id);
+        Optional<NotificationsEntity> notificationExistente = Optional.ofNullable(NotificationService.obtenerNotificacionPorId(id));
         if (notificationExistente.isPresent()) {
             notificationActualizada.setId(id);
-            NotificationsEntity notificacionActualizada = notificationsService.guardarNotificacion(notificationActualizada);
+            NotificationsEntity notificacionActualizada = NotificationService.guardarNotificacion(notificationActualizada);
             return new ResponseEntity<>(notificacionActualizada, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
