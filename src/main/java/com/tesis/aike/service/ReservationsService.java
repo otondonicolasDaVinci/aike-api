@@ -32,7 +32,7 @@ public class ReservationsService {
     }
 
     public List<ReservationsEntity> obtenerReservasEnRangoDeFechas(Date startDate, Date endDate) {
-        return reservationsRepository.findByStartDateLessThanEqualAndEndDateGreaterThanEqual(startDate, endDate);
+        return reservationsRepository.findByStartDateLessThanEqualAndEndDateGreaterThanEqual(startDate.toLocalDate(), endDate.toLocalDate());
     }
 
     public List<ReservationsEntity> obtenerReservasPorEstado(String status) {
@@ -40,11 +40,11 @@ public class ReservationsService {
     }
 
     public List<ReservationsEntity> obtenerReservasPorFechaInicio(Date startDate) {
-        return reservationsRepository.findByStartDate(startDate);
+        return reservationsRepository.findByStartDate(startDate.toLocalDate());
     }
 
     public List<ReservationsEntity> obtenerReservasPorFechaFin(Date endDate) {
-        return reservationsRepository.findByEndDate(endDate);
+        return reservationsRepository.findByEndDate(endDate.toLocalDate());
     }
 
     public ReservationsEntity guardarReserva(ReservationsEntity reservation) {

@@ -4,7 +4,7 @@ import com.tesis.aike.model.entity.ReservationsEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -13,11 +13,11 @@ public interface ReservationsRepository extends JpaRepository<ReservationsEntity
 
     List<ReservationsEntity> findByCabinId(int cabinId);
 
-    List<ReservationsEntity> findByStartDateLessThanEqualAndEndDateGreaterThanEqual(Date startDate, Date endDate);
+    List<ReservationsEntity> findByStartDateLessThanEqualAndEndDateGreaterThanEqual(LocalDate startDate, LocalDate endDate);
 
     List<ReservationsEntity> findByStatus(String status);
 
-    List<ReservationsEntity> findByStartDate(Date startDate);
+    List<ReservationsEntity> findByStartDate(LocalDate startDate);
 
-    List<ReservationsEntity> findByEndDate(Date endDate);
+    List<ReservationsEntity> findByEndDate(LocalDate endDate);
 }
