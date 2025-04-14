@@ -18,7 +18,6 @@ public class aikeSecurity {
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll() // Permitir POST a /api/user
                         .requestMatchers(HttpMethod.GET, "/api/ia/chat").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/ia/chat").permitAll()
-
                         .requestMatchers(HttpMethod.GET, "/api/users/{id}").permitAll() // Permitir POST a /api/users
                         .requestMatchers("/api/cabins").permitAll() // Permitir acceso a /api/cabins
                         .requestMatchers("/api/roles").permitAll()  // Permitir acceso a /api/roles
