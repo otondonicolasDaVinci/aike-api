@@ -4,6 +4,8 @@ import com.tesis.aike.model.entity.CabinsEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface CabinsRepository extends JpaRepository<CabinsEntity, Integer> {
     // JpaRepository proporciona métodos CRUD básicos (save, findById, findAll, deleteById, etc.)
@@ -17,4 +19,7 @@ public interface CabinsRepository extends JpaRepository<CabinsEntity, Integer> {
 
     // Ejemplo de método personalizado para buscar cabañas con una capacidad específica
     // List<CabinsEntity> findByCapacity(int capacity);
+
+    List<CabinsEntity> findByAvailableTrue();
+
 }

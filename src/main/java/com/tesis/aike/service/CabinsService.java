@@ -30,4 +30,11 @@ public class CabinsService {
     }
 
     // ... otros métodos que utilicen el repositorio
+
+    public List<CabinsEntity> getAvailableCabins() {
+        // Llama al método del repositorio que busca por available = true
+        List<CabinsEntity> availableCabins = cabinsRepository.findByAvailableTrue();
+        // Aquí podrías añadir lógica adicional si fuera necesario (DTO mapping, etc.)
+        return availableCabins;
+    }
 }
