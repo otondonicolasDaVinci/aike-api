@@ -1,60 +1,36 @@
-package com.tesis.aike.controller; // Asegúrate de usar el paquete correcto para tus controladores
+package com.tesis.aike.controller;
 
 import com.tesis.aike.model.entity.ReservationsEntity;
-import com.tesis.aike.service.ReservationsService; // Asegúrate de que la ruta a tu servicio sea correcta
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.tesis.aike.repository.ReservationsRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/reservations")
+@RequestMapping("/reservations")
 public class ReservationsController {
 
-    @Autowired
-    private ReservationsService reservationsService;
+    private final ReservationsRepository reservationsRepository;
 
-    @GetMapping
-    public ResponseEntity<List<ReservationsEntity>> obtenerTodasLasReservas() {
-        List<ReservationsEntity> reservations = reservationsService.obtenerTodasLasReservas();
-        return new ResponseEntity<>(reservations, HttpStatus.OK);
+    public ReservationsController(ReservationsRepository reservationsRepository) {
+        this.reservationsRepository = reservationsRepository;
     }
 
+    // Obtener todas las reservas de un usuario por su ID
+    @GetMapping("/user/{userId}")
+    public List<ReservationsEntity> getReservationsByUserId(@PathVariable int userId) {
+        return reservationsRepository.findByUserId(userId);
+    }
+
+    // Obtener información de una reserva específica por su ID
     @GetMapping("/{id}")
-    public ResponseEntity<ReservationsEntity> obtenerReservaPorId(@PathVariable int id) {
-        Optional<ReservationsEntity> reservation = reservationsService.obtenerReservaPorId(id);
-        return reservation.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ReservationsEntity getReservationById(@PathVariable int id) {
+        return reservationsRepository.findById(id).orElse(null);
     }
 
+    // Crear una nueva reserva
     @PostMapping
-    public ResponseEntity<ReservationsEntity> crearReserva(@RequestBody ReservationsEntity reservation) {
-        ReservationsEntity nuevaReserva = reservationsService.guardarReserva(reservation);
-        return new ResponseEntity<>(nuevaReserva, HttpStatus.CREATED);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<ReservationsEntity> actualizarReserva(@PathVariable int id, @RequestBody ReservationsEntity reservationActualizada) {
-        Optional<ReservationsEntity> reservationExistente = reservationsService.obtenerReservaPorId(id);
-        if (reservationExistente.isPresent()) {
-            reservationActualizada.setId(id);
-            ReservationsEntity reservaActualizada = reservationsService.guardarReserva(reservationActualizada);
-            return new ResponseEntity<>(reservaActualizada, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarReserva(@PathVariable int id) {
-        if (reservationsService.obtenerReservaPorId(id).isPresent()) {
-            reservationsService.eliminarReserva(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public ReservationsEntity createReservation(@RequestBody ReservationsEntity reservation) {
+        return reservationsRepository.save(reservation);
     }
 }
