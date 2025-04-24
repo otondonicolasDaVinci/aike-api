@@ -1,7 +1,12 @@
-package com.tesis.aike.service;
+package com.tesis.aike.service.impl;
 
-import com.tesis.aike.model.entity.CabinsEntity;
+import com.tesis.aike.helper.mapper.CabinMapper;
+import com.tesis.aike.model.dto.CabinDTO;
+import com.tesis.aike.model.entity.CabinEntity;
 import com.tesis.aike.model.entity.ReservationsEntity; // Importar entidad de Reservas
+import com.tesis.aike.service.AikeAIService;
+import com.tesis.aike.service.CabinService;
+import com.tesis.aike.service.ReservationsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -16,25 +21,26 @@ import java.util.stream.Collectors;
 import java.time.format.DateTimeFormatter; // Para formatear fechas
 
 @Service
-public class AikeIA {
+public class AikeAIServiceImpl implements AikeAIService {
 
-    private static final Logger logger = LoggerFactory.getLogger(AikeIA.class);
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy"); // Formato de fecha
+    private static final Logger logger = LoggerFactory.getLogger(AikeAIServiceImpl.class);
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final ChatClient chatClient;
-    private final CabinsService cabinsService;
-    private final ReservationsService reservationsService; // Añadir servicio de reservas
+    private final CabinService cabinService;
+    private final ReservationsService reservationsService;
 
-    // Inyección por constructor para todas las dependencias
+    private final CabinMapper cabinMapper;
+
     @Autowired
-    public AikeIA(ChatClient.Builder chatClientBuilder,
-                  CabinsService cabinsService,
-                  ReservationsService reservationsService) { // Añadir al constructor
+    public AikeAIServiceImpl(ChatClient.Builder chatClientBuilder, CabinService cabinService, ReservationsService reservationsService, CabinMapper cabinMapper) {
         this.chatClient = chatClientBuilder.build();
-        this.cabinsService = cabinsService;
-        this.reservationsService = reservationsService; // Asignar servicio
+        this.cabinService = cabinService;
+        this.reservationsService = reservationsService;
+        this.cabinMapper = cabinMapper;
     }
 
+    @Override
     public String obtenerRespuestaChat(String mensaje) {
         // --- Alternativa si NO usas Spring Security ---
         // Necesitarías cambiar la firma del método, por ejemplo:
@@ -54,21 +60,21 @@ public class AikeIA {
         if (consultaCabanas) {
             logger.info("Detectada pregunta sobre disponibilidad de cabañas.");
             try {
-                List<CabinsEntity> cabanasDisponibles = this.cabinsService.getAvailableCabins();
+                List<CabinDTO> availableCabins = cabinService.findByAvailableTrue();
                 String infoCabanas;
-                if (cabanasDisponibles.isEmpty()) {
+                if (availableCabins.isEmpty()) {
                     infoCabanas = "Actualmente no hay cabañas disponibles según nuestros registros.";
                     logger.info("No se encontraron cabañas disponibles en la BD.");
                 } else {
                     infoCabanas = "Según nuestros registros, las siguientes cabañas están disponibles:\n" +
-                            cabanasDisponibles.stream()
+                            availableCabins.stream()
                                     .map(cabana -> String.format("- Cabaña '%s' (Capacidad: %d)%s",
                                             cabana.getName(),
                                             cabana.getCapacity(),
                                             (cabana.getDescription() != null && !cabana.getDescription().trim().isEmpty()) ? ": " + cabana.getDescription() : ""
                                     ))
                                     .collect(Collectors.joining("\n"));
-                    logger.info("Se encontraron {} cabañas disponibles.", cabanasDisponibles.size());
+                    logger.info("Se encontraron {} cabañas disponibles.", availableCabins.size());
                 }
 
                 promptParaEnviar = String.format(

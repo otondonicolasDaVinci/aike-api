@@ -1,6 +1,6 @@
 package com.tesis.aike; // Puedes usar cualquier paquete
 
-import com.tesis.aike.service.AikeIA; // Asegúrate que la ruta sea correcta
+import com.tesis.aike.service.impl.AikeAIServiceImpl; // Asegúrate que la ruta sea correcta
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component; // Para que Spring lo detecte como un Bean
 
@@ -9,10 +9,10 @@ import java.util.Scanner;
 @Component // Marca esta clase como un componente de Spring para que sea detectada y ejecutada
 public class ChatConsoleTester implements CommandLineRunner {
 
-    private final AikeIA chatGptService;
+    private final AikeAIServiceImpl chatGptService;
 
     // Inyecta tu servicio igual que lo harías en un controlador
-    public ChatConsoleTester(AikeIA chatGptService) {
+    public ChatConsoleTester(AikeAIServiceImpl chatGptService) {
         this.chatGptService = chatGptService;
     }
 

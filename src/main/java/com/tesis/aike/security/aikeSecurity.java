@@ -15,21 +15,12 @@ public class aikeSecurity {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll() // Permitir POST a /api/user
-                        .requestMatchers(HttpMethod.GET, "/api/ia/chat").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/ia/chat").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/users/{id}").permitAll() // Permitir POST a /api/users
-                        .requestMatchers("/api/cabins").permitAll() // Permitir acceso a /api/cabins
-                        .requestMatchers("/api/roles").permitAll()  // Permitir acceso a /api/roles
-                        .requestMatchers("/api/notifications").permitAll()  // Permitir acceso a /api/notifications
-                        .requestMatchers("/api/payments").permitAll()  // Permitir acceso a /api/payments
-                        .requestMatchers("/api/reservations").permitAll()  // Permitir acceso a /api/reservations
-                        .anyRequest().authenticated() // El resto requiere autenticación
+                        .anyRequest().permitAll()
                 )
-                .formLogin(form -> form.disable())      // Use formLogin with a lambda and disable()
-                .httpBasic(basic -> basic.disable())    // Use httpBasic with a lambda and disable()
-                .csrf(csrf -> csrf.disable())           // Use csrf with a lambda and disable()
-                .cors(cors -> cors.disable());          // Use cors with a lambda and disable()
+                .formLogin(form -> form.disable())
+                .httpBasic(basic -> basic.disable())
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable());
         return http.build();
     }
 }
