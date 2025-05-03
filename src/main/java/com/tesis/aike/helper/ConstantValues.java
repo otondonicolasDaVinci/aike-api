@@ -37,40 +37,35 @@ public class ConstantValues {
 
     public static class QueryKeywords {
         public static final String[] AVAILABLE_CABINS = {
-                "cabañas disponibles",
-                "disponibilidad",
-                "cabaña libre",
-                "cabañas libres",
-                "qué cabañas hay",
-                "consultar cabañas",
-                "cabañas",
-                "cabañas disponibles para reservar",
-                "cabañas disponibles para alquilar",
-                "cabañas disponibles para arrendar",
-                "cabañas disponibles para hospedarse",
+                "cabañas disponibles", "disponibilidad", "cabaña libre", "cabañas libres",
+                "qué cabañas hay", "consultar cabañas", "cabañas",
+                "cabañas disponibles para reservar", "cabañas disponibles para alquilar",
+                "cabañas disponibles para arrendar", "cabañas disponibles para hospedarse"
         };
 
         public static final String[] USER_RESERVATIONS = {
-                "mis reservas",
-                "ver mis reservas",
-                "reservas que hice",
-                "mis reservaciones",
-                "estado de mis reservas",
-                "reservas",
-                "reservaciones",
-                "consultar reservas",
-                "consultar reservaciones",
-                "consultar mis reservas",
-                "consultar mis reservaciones",
-                "consultar mis reservas",
+                "mis reservas", "ver mis reservas", "reservas que hice", "mis reservaciones",
+                "estado de mis reservas", "consultar mis reservas", "consultar mis reservaciones"
         };
 
         public static final String[] RESERVATION_OWNERSHIP = {"mias", "mis", "mía", "mi"};
+
+        public static final String[] ALL_RESERVATIONS = {
+                "todas las reservas", "reservas de todos", "lista completa de reservas",
+                "ocupación de las cabañas", "reservas actuales", "reservas pendientes",
+                "quién reservó", "reservas de las cabañas"
+        };
+
+        public static final String[] SENSITIVE_DATA = {
+                "dni de", "correo de", "email de", "número de documento de"
+        };
     }
 
     public static class Security {
         public static final String JWT_INVALID = "Token JWT inválido";
         public static final String LOGIN_FAILED = "Credenciales inválidas";
+        public static final String AUTHORIZATION = "Authorization";
+        public static final String BEARER = "Bearer ";
     }
 
     public static class LoggerMessages {

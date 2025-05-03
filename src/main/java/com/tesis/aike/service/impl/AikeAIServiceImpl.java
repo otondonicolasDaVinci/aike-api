@@ -24,79 +24,73 @@ import java.util.stream.Collectors;
 public class AikeAIServiceImpl implements AikeAIService {
 
     private static final Logger logger = LoggerFactory.getLogger(AikeAIServiceImpl.class);
-    private static final DateTimeFormatter DATE_FORMATTER =
-            DateTimeFormatter.ofPattern(ConstantValues.AikeAIService.DATE_PATTERN);
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(ConstantValues.AikeAIService.DATE_PATTERN);
 
-    private final ChatClient chatClient;
-    private final CabinService cabinService;
-    private final ReservationService reservationService;
+    private final ChatClient chat;
+    private final CabinService cabinSvc;
+    private final ReservationService resSvc;
 
     @Autowired
-    public AikeAIServiceImpl(ChatClient.Builder chatClientBuilder,
-                             CabinService cabinService,
-                             ReservationService reservationService) {
-        this.chatClient = chatClientBuilder.build();
-        this.cabinService = cabinService;
-        this.reservationService = reservationService;
+    public AikeAIServiceImpl(ChatClient.Builder builder,
+                             CabinService cabinSvc,
+                             ReservationService resSvc) {
+        this.chat = builder.build();
+        this.cabinSvc = cabinSvc;
+        this.resSvc = resSvc;
     }
 
-    public String promptResponse(String message) {
-        if (message == null || message.trim().isEmpty()) {
+    public String promptResponse(String msg) {
+        if (msg == null || msg.trim().isEmpty())
             return ConstantValues.AikeAIConstant.EMPTY_PROMPT;
-        }
 
-        String promptToSend = message;
-        boolean askCabins = QueryDetector.isAvailableCabinsQuery(message);
-        boolean askMyReservations = QueryDetector.isReservationQuery(message);
+        Integer uid = getUserId();
+        boolean isAdmin = currentUserIsAdmin();
+
+        if (QueryDetector.isSensitiveDataQuery(msg) && !isAdmin)
+            return "Necesitas permisos de administrador para ver esa información.";
+
+        boolean askCabins = QueryDetector.isAvailableCabinsQuery(msg);
+        boolean askOwnRes = QueryDetector.isReservationQuery(msg);
+        boolean askAllRes = QueryDetector.isAllReservationsQuery(msg);
+
+        String prompt = msg;
 
         if (askCabins) {
             try {
-                List<CabinDTO> cabins = cabinService.findByAvailableTrue();
-                String cabinLines = cabins.stream()
+                List<CabinDTO> cabs = cabinSvc.findByAvailableTrue();
+                String lines = cabs.stream()
                         .map(c -> String.format("- Cabaña '%s' (Capacidad: %d)%s",
                                 c.getName(), c.getCapacity(),
-                                c.getDescription() != null && !c.getDescription().isBlank()
-                                        ? ": " + c.getDescription()
-                                        : ""))
+                                c.getDescription() == null || c.getDescription().isBlank()
+                                        ? "" : ": " + c.getDescription()))
                         .collect(Collectors.joining("\n"));
 
-                String cabinsInfo = cabins.isEmpty()
+                String info = cabs.isEmpty()
                         ? ConstantValues.AikeAIService.NO_AVAILABLE_CABINS
-                        : String.format(ConstantValues.AikeAIService.AVAILABLE_CABINS_TEMPLATE, cabinLines);
+                        : String.format(ConstantValues.AikeAIService.AVAILABLE_CABINS_TEMPLATE, lines);
 
-                promptToSend = String.format(
-                        ConstantValues.AikeAIService.CONTEXT_CABINS_PROMPT,
-                        cabinsInfo, message);
+                prompt = String.format(ConstantValues.AikeAIService.CONTEXT_CABINS_PROMPT, info, msg);
             } catch (Exception e) {
                 logger.error(ConstantValues.LoggerMessages.ERROR_FETCH_CABINS, e.getMessage(), e);
                 return ConstantValues.AikeAIService.ERROR_CABINS;
             }
-        } else if (askMyReservations) {
+        } else if (askOwnRes) {
             try {
-                Integer userId = getAuthenticatedUserId();
-                if (userId == null) {
-                    promptToSend = String.format(
-                            ConstantValues.AikeAIService.USER_NOT_IDENTIFIED_TEMPLATE, message);
+                if (uid == null) {
+                    prompt = String.format(ConstantValues.AikeAIService.USER_NOT_IDENTIFIED_TEMPLATE, msg);
                 } else {
-                    List<ReservationDTO> reservations = reservationService.findByUserId(userId);
-
-                    String reservationLines = reservations.stream()
-                            .map(r -> String.format(
-                                    ConstantValues.AikeAIService.RESERVATION_LINE_TEMPLATE,
-                                    r.getId(), r.getCabin().getName(),
-                                    r.getStartDate().format(DATE_FORMATTER),
-                                    r.getEndDate().format(DATE_FORMATTER),
-                                    r.getStatus()))
-                            .collect(Collectors.joining("\n"));
-
-                    String info = reservations.isEmpty()
-                            ? ConstantValues.AikeAIService.NO_RESERVATIONS
-                            : String.format(ConstantValues.AikeAIService.USER_RESERVATIONS_TEMPLATE, reservationLines);
-
-                    promptToSend = String.format(
-                            ConstantValues.AikeAIService.CONTEXT_RESERVATIONS_PROMPT,
-                            userId, info, message);
+                    List<ReservationDTO> list = resSvc.findByUserId(uid);
+                    prompt = buildReservationContext(uid, list, msg);
                 }
+            } catch (Exception e) {
+                logger.error(ConstantValues.LoggerMessages.ERROR_FETCH_RESERVATIONS, e.getMessage(), e);
+                return ConstantValues.AikeAIService.ERROR_RESERVATIONS;
+            }
+        } else if (askAllRes) {
+            if (!isAdmin) return "Necesitas permisos de administrador para ver todas las reservas.";
+            try {
+                List<ReservationDTO> list = resSvc.findAll();
+                prompt = buildReservationContext(-1, list, msg); // -1 indica contexto global
             } catch (Exception e) {
                 logger.error(ConstantValues.LoggerMessages.ERROR_FETCH_RESERVATIONS, e.getMessage(), e);
                 return ConstantValues.AikeAIService.ERROR_RESERVATIONS;
@@ -104,40 +98,48 @@ public class AikeAIServiceImpl implements AikeAIService {
         }
 
         try {
-            return chatClient.prompt().user(promptToSend).call().content();
+            return chat.prompt().user(prompt).call().content();
         } catch (Exception e) {
             logger.error(ConstantValues.LoggerMessages.ERROR_CALL_OPENAI, e.getMessage(), e);
             return ConstantValues.AikeAIService.ERROR_OPENAI;
         }
     }
 
-    private Integer getAuthenticatedUserId() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) return null;
+    private String buildReservationContext(Integer uid, List<ReservationDTO> list, String originalMsg) {
+        String lines = list.stream()
+                .map(r -> String.format(ConstantValues.AikeAIService.RESERVATION_LINE_TEMPLATE,
+                        r.getId(), r.getCabin().getName(),
+                        r.getStartDate().format(DATE_TIME_FORMATTER), r.getEndDate().format(DATE_TIME_FORMATTER), r.getStatus()))
+                .collect(Collectors.joining("\n"));
 
-        Object principal = auth.getPrincipal();
+        String info = list.isEmpty()
+                ? ConstantValues.AikeAIService.NO_RESERVATIONS
+                : String.format(ConstantValues.AikeAIService.USER_RESERVATIONS_TEMPLATE, lines);
+
+        return String.format(ConstantValues.AikeAIService.CONTEXT_RESERVATIONS_PROMPT, uid, info, originalMsg);
+    }
+
+    private Integer getUserId() {
+        Authentication a = SecurityContextHolder.getContext().getAuthentication();
+        if (a == null || !a.isAuthenticated()) return null;
+        Object p = a.getPrincipal();
         try {
-            if (principal instanceof User u) return Integer.parseInt(u.getUsername());
-            if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User o) {
+            if (p instanceof User u) return Integer.parseInt(u.getUsername());
+            if (p instanceof org.springframework.security.oauth2.core.user.OAuth2User o) {
                 String id = o.getAttribute("sub");
-                return id != null ? Integer.parseInt(id) : null;
+                return id == null ? null : Integer.parseInt(id);
             }
-            if (principal instanceof String s) return Integer.parseInt(s);
+            if (p instanceof String s) return Integer.parseInt(s);
         } catch (Exception e) {
             logger.error(ConstantValues.LoggerMessages.ERROR_AUTH_ID, e.getMessage(), e);
         }
         return null;
     }
 
-    public String systemRoleResponse(String systemMessage, String userMessage) {
-        if (userMessage == null || userMessage.trim().isEmpty()) {
-            return ConstantValues.AikeAIConstant.EMPTY_PROMPT;
-        }
-        try {
-            return chatClient.prompt().system(systemMessage).user(userMessage).call().content();
-        } catch (Exception e) {
-            logger.error(ConstantValues.LoggerMessages.ERROR_SYSTEM_OPENAI, e.getMessage());
-            return ConstantValues.AikeAIService.ERROR_OPENAI;
-        }
+    private boolean currentUserIsAdmin() {
+        Authentication a = SecurityContextHolder.getContext().getAuthentication();
+        if (a == null || !a.isAuthenticated()) return false;
+        return a.getAuthorities().stream()
+                .anyMatch(granted -> granted.getAuthority().equals("ROLE_ADMIN"));
     }
 }
