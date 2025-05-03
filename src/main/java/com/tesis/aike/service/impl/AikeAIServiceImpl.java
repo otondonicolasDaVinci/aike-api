@@ -24,7 +24,8 @@ import java.util.stream.Collectors;
 public class AikeAIServiceImpl implements AikeAIService {
 
     private static final Logger logger = LoggerFactory.getLogger(AikeAIServiceImpl.class);
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(ConstantValues.AikeAIService.DATE_PATTERN);
+    private static final DateTimeFormatter DATE_FORMATTER =
+            DateTimeFormatter.ofPattern(ConstantValues.AikeAIService.DATE_PATTERN);
 
     private final ChatClient chatClient;
     private final CabinService cabinService;
@@ -39,7 +40,6 @@ public class AikeAIServiceImpl implements AikeAIService {
         this.reservationService = reservationService;
     }
 
-    @Override
     public String promptResponse(String message) {
         if (message == null || message.trim().isEmpty()) {
             return ConstantValues.AikeAIConstant.EMPTY_PROMPT;
@@ -51,98 +51,80 @@ public class AikeAIServiceImpl implements AikeAIService {
 
         if (askCabins) {
             try {
-                List<CabinDTO> availableCabins = cabinService.findByAvailableTrue();
-                String cabinLines = availableCabins.stream()
-                        .map(cabana -> String.format("- Cabaña '%s' (Capacidad: %d)%s",
-                                cabana.getName(),
-                                cabana.getCapacity(),
-                                cabana.getDescription() != null && !cabana.getDescription().trim().isEmpty()
-                                        ? ": " + cabana.getDescription()
+                List<CabinDTO> cabins = cabinService.findByAvailableTrue();
+                String cabinLines = cabins.stream()
+                        .map(c -> String.format("- Cabaña '%s' (Capacidad: %d)%s",
+                                c.getName(), c.getCapacity(),
+                                c.getDescription() != null && !c.getDescription().isBlank()
+                                        ? ": " + c.getDescription()
                                         : ""))
                         .collect(Collectors.joining("\n"));
 
-                String cabinsInfo = availableCabins.isEmpty()
+                String cabinsInfo = cabins.isEmpty()
                         ? ConstantValues.AikeAIService.NO_AVAILABLE_CABINS
                         : String.format(ConstantValues.AikeAIService.AVAILABLE_CABINS_TEMPLATE, cabinLines);
 
                 promptToSend = String.format(
                         ConstantValues.AikeAIService.CONTEXT_CABINS_PROMPT,
-                        cabinsInfo,
-                        message
-                );
+                        cabinsInfo, message);
             } catch (Exception e) {
-                logger.error("Error al obtener información de cabañas: {}", e.getMessage(), e);
+                logger.error(ConstantValues.LoggerMessages.ERROR_FETCH_CABINS, e.getMessage(), e);
                 return ConstantValues.AikeAIService.ERROR_CABINS;
             }
         } else if (askMyReservations) {
             try {
                 Integer userId = getAuthenticatedUserId();
-
                 if (userId == null) {
                     promptToSend = String.format(
-                            ConstantValues.AikeAIService.USER_NOT_IDENTIFIED_TEMPLATE,
-                            message);
+                            ConstantValues.AikeAIService.USER_NOT_IDENTIFIED_TEMPLATE, message);
                 } else {
-                    List<ReservationDTO> myReservations = reservationService.findByUserId(userId);
+                    List<ReservationDTO> reservations = reservationService.findByUserId(userId);
 
-                    String reservationLines = myReservations.stream()
-                            .map(reserva -> String.format(
-                                    "- Reserva ID: %d | Cabaña ID: %d | Desde: %s | Hasta: %s | Estado: %s",
-                                    reserva.getId(),
-                                    reserva.getId(),
-                                    reserva.getStartDate().format(DATE_FORMATTER),
-                                    reserva.getEndDate().format(DATE_FORMATTER),
-                                    reserva.getStatus()))
+                    String reservationLines = reservations.stream()
+                            .map(r -> String.format(
+                                    ConstantValues.AikeAIService.RESERVATION_LINE_TEMPLATE,
+                                    r.getId(), r.getCabin().getName(),
+                                    r.getStartDate().format(DATE_FORMATTER),
+                                    r.getEndDate().format(DATE_FORMATTER),
+                                    r.getStatus()))
                             .collect(Collectors.joining("\n"));
 
-                    String reservationsInfo = myReservations.isEmpty()
+                    String info = reservations.isEmpty()
                             ? ConstantValues.AikeAIService.NO_RESERVATIONS
                             : String.format(ConstantValues.AikeAIService.USER_RESERVATIONS_TEMPLATE, reservationLines);
 
                     promptToSend = String.format(
                             ConstantValues.AikeAIService.CONTEXT_RESERVATIONS_PROMPT,
-                            userId,
-                            reservationsInfo,
-                            message
-                    );
+                            userId, info, message);
                 }
             } catch (Exception e) {
-                logger.error("Error al obtener información de reservas: {}", e.getMessage(), e);
+                logger.error(ConstantValues.LoggerMessages.ERROR_FETCH_RESERVATIONS, e.getMessage(), e);
                 return ConstantValues.AikeAIService.ERROR_RESERVATIONS;
             }
         }
 
         try {
-            return chatClient.prompt()
-                    .user(promptToSend)
-                    .call()
-                    .content();
+            return chatClient.prompt().user(promptToSend).call().content();
         } catch (Exception e) {
-            logger.error("Error al llamar a la API OpenAI: {}", e.getMessage(), e);
+            logger.error(ConstantValues.LoggerMessages.ERROR_CALL_OPENAI, e.getMessage(), e);
             return ConstantValues.AikeAIService.ERROR_OPENAI;
         }
     }
 
     private Integer getAuthenticatedUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return null;
-        }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) return null;
 
-        Object principal = authentication.getPrincipal();
+        Object principal = auth.getPrincipal();
         try {
-            if (principal instanceof User user) {
-                return Integer.parseInt(user.getUsername());
-            }
-            if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User oauth) {
-                String id = oauth.getAttribute("sub");
+            if (principal instanceof User u) return Integer.parseInt(u.getUsername());
+            if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User o) {
+                String id = o.getAttribute("sub");
                 return id != null ? Integer.parseInt(id) : null;
             }
-            if (principal instanceof String str) {
-                return Integer.parseInt(str);
-            }
+            if (principal instanceof String s) return Integer.parseInt(s);
         } catch (Exception e) {
-            logger.error("No se pudo obtener ID de usuario autenticado: {}", e.getMessage(), e);
+            logger.error(ConstantValues.LoggerMessages.ERROR_AUTH_ID, e.getMessage(), e);
         }
         return null;
     }
@@ -151,15 +133,10 @@ public class AikeAIServiceImpl implements AikeAIService {
         if (userMessage == null || userMessage.trim().isEmpty()) {
             return ConstantValues.AikeAIConstant.EMPTY_PROMPT;
         }
-
         try {
-            return chatClient.prompt()
-                    .system(systemMessage)
-                    .user(userMessage)
-                    .call()
-                    .content();
+            return chatClient.prompt().system(systemMessage).user(userMessage).call().content();
         } catch (Exception e) {
-            logger.error("Error al usar rol de sistema con OpenAI: {}", e.getMessage());
+            logger.error(ConstantValues.LoggerMessages.ERROR_SYSTEM_OPENAI, e.getMessage());
             return ConstantValues.AikeAIService.ERROR_OPENAI;
         }
     }
