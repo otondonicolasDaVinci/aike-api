@@ -1,20 +1,23 @@
 package com.tesis.aike.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CabinDTO {
-    private Long id;
+
+    private Integer id;
     private String name;
     private Integer capacity;
     private String description;
     private Boolean available;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -48,5 +51,16 @@ public class CabinDTO {
 
     public void setAvailable(Boolean available) {
         this.available = available;
+    }
+
+    @Override
+    public String toString() {
+        return "CabinDTO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", capacity=" + capacity +
+                ", description='" + description + '\'' +
+                ", available=" + available +
+                '}';
     }
 }
