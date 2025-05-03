@@ -12,11 +12,12 @@ public class AikeSecurity {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests((requests) -> requests.anyRequest().permitAll())
-                .formLogin(form -> form.disable())
-                .httpBasic(basic -> basic.disable())
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.disable());
+        http.csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/login").permitAll()
+                        .anyRequest().authenticated())
+                .addFilterBefore(new JwtAuthenticationFilter(),
+                        org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

@@ -19,6 +19,7 @@ public class ConstantValues {
         public static final String CONTEXT_RESERVATIONS_PROMPT = "Contexto de la base de datos sobre las reservas del usuario (ID: %d):\n%s\n\nPregunta del usuario: \"%s\"\n\nInstrucción: Responde a la pregunta del usuario de forma amigable y conversacional, presentando la información del contexto sobre SUS reservas. Usa SÓLO esta información. No inventes reservas ni detalles.";
         public static final String ERROR_RESERVATIONS = "Lo siento, tuve problemas para consultar tus reservas. Por favor, intenta de nuevo más tarde.";
         public static final String ERROR_OPENAI = "Lo siento, hubo un error al procesar tu solicitud con el asistente virtual.";
+        public static final String RESERVATION_LINE_TEMPLATE = "- Reserva número: %d | Cabaña: %s | Desde: %s | Hasta: %s | Estado: %s";
     }
 
     public static class ReservationService {
@@ -65,5 +66,18 @@ public class ConstantValues {
         };
 
         public static final String[] RESERVATION_OWNERSHIP = {"mias", "mis", "mía", "mi"};
+    }
+
+    public static class Security {
+        public static final String JWT_INVALID = "Token JWT inválido";
+        public static final String LOGIN_FAILED = "Credenciales inválidas";
+    }
+
+    public static class LoggerMessages {
+        public static final String ERROR_FETCH_CABINS = "Error al obtener información de cabañas: {}";
+        public static final String ERROR_FETCH_RESERVATIONS = "Error al obtener información de reservas: {}";
+        public static final String ERROR_CALL_OPENAI = "Error al llamar a la API OpenAI: {}";
+        public static final String ERROR_SYSTEM_OPENAI = "Error al usar rol de sistema con OpenAI: {}";
+        public static final String ERROR_AUTH_ID = "No se pudo obtener ID de usuario autenticado: {}";
     }
 }
