@@ -5,6 +5,7 @@ import com.tesis.aike.model.dto.CabinDTO;
 import com.tesis.aike.model.entity.CabinEntity;
 import com.tesis.aike.repository.CabinRepository;
 import com.tesis.aike.service.CabinService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ public class CabinServiceImpl implements CabinService {
     private final CabinRepository repository;
     private final CabinMapper mapper;
 
+    @Autowired
     public CabinServiceImpl(CabinRepository repository, CabinMapper mapper) {
         this.repository = repository;
         this.mapper = mapper;
@@ -29,7 +31,7 @@ public class CabinServiceImpl implements CabinService {
     }
 
     @Override
-    public CabinDTO update(Long id, CabinDTO dto) {
+    public CabinDTO update(Integer id, CabinDTO dto) {
         CabinEntity entity = repository.findById(id.intValue())
                 .orElseThrow(() -> new RuntimeException("Cabin not found with id: " + id));
         entity.setName(dto.getName());
@@ -41,7 +43,7 @@ public class CabinServiceImpl implements CabinService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Integer id) {
         if (!repository.existsById(id.intValue())) {
             throw new RuntimeException("Cabin not found with id: " + id);
         }
@@ -49,7 +51,7 @@ public class CabinServiceImpl implements CabinService {
     }
 
     @Override
-    public CabinDTO findById(Long id) {
+    public CabinDTO findById(Integer id) {
         CabinEntity entity = repository.findById(id.intValue())
                 .orElseThrow(() -> new RuntimeException("Cabin not found with id: " + id));
         return mapper.toDTO(entity);

@@ -21,6 +21,19 @@ public class ConstantValues {
         public static final String ERROR_OPENAI = "Lo siento, hubo un error al procesar tu solicitud con el asistente virtual.";
     }
 
+    public static class ReservationService {
+        public static final String NOT_FOUND = "Reserva no encontrada";
+        public static final String CABIN_NOT_AVAILABLE = "La cabaña no está disponible en las fechas solicitadas";
+    }
+
+    public static class UserService {
+        public static final String NOT_FOUND = "Usuario no encontrado";
+    }
+
+    public static class Encryption {
+        public static final String ERROR = "Error al encriptar la contraseña";
+    }
+
     public static class QueryKeywords {
         public static final String[] AVAILABLE_CABINS = {
                 "cabañas disponibles",
@@ -51,7 +64,6 @@ public class ConstantValues {
                 "consultar mis reservas",
         };
 
-        public static final String[] RESERVATION_OWNERSHIP = { "mias", "mis", "mía", "mi" };
+        public static final String[] RESERVATION_OWNERSHIP = {"mias", "mis", "mía", "mi"};
     }
-
 }

@@ -10,7 +10,7 @@ public class UsersEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
-    private int id;
+    private Integer id;
     @Basic
     @Column(name = "name", nullable = false, length = 100)
     private String name;
@@ -25,7 +25,7 @@ public class UsersEntity {
     private String password;
     @Basic
     @Column(name = "role_id", nullable = false)
-    private int roleId;
+    private Integer roleId;
 
     public int getId() {
         return id;

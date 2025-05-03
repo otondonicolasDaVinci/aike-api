@@ -25,7 +25,7 @@ public class CabinController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CabinDTO> find(@PathVariable Long id) {
+    public ResponseEntity<CabinDTO> find(@PathVariable Integer id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
@@ -35,12 +35,12 @@ public class CabinController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CabinDTO> update(@PathVariable Long id, @RequestBody CabinDTO cabin) {
+    public ResponseEntity<CabinDTO> update(@PathVariable Integer id, @RequestBody CabinDTO cabin) {
         return ResponseEntity.ok(service.update(id, cabin));
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable Integer id) {
         service.delete(id);
     }
 }

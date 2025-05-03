@@ -1,17 +1,18 @@
 package com.tesis.aike.service;
 
 import com.tesis.aike.model.dto.CabinDTO;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 public interface CabinService {
     CabinDTO create(CabinDTO dto);
 
-    CabinDTO update(Long id, CabinDTO dto);
+    CabinDTO update(Integer id, CabinDTO dto);
 
-    void delete(Long id);
+    void delete(Integer id);
 
-    CabinDTO findById(Long id);
+    CabinDTO findById(Integer id);
 
     List<CabinDTO> findAll();
 

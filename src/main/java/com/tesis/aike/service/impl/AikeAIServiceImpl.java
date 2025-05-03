@@ -2,10 +2,10 @@ package com.tesis.aike.service.impl;
 
 import com.tesis.aike.helper.ConstantValues;
 import com.tesis.aike.model.dto.CabinDTO;
-import com.tesis.aike.model.entity.ReservationsEntity;
+import com.tesis.aike.model.dto.ReservationDTO;
 import com.tesis.aike.service.AikeAIService;
 import com.tesis.aike.service.CabinService;
-import com.tesis.aike.service.ReservationsService;
+import com.tesis.aike.service.ReservationService;
 import com.tesis.aike.utils.QueryDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,20 +24,19 @@ import java.util.stream.Collectors;
 public class AikeAIServiceImpl implements AikeAIService {
 
     private static final Logger logger = LoggerFactory.getLogger(AikeAIServiceImpl.class);
-    private static final DateTimeFormatter DATE_FORMATTER =
-            DateTimeFormatter.ofPattern(ConstantValues.AikeAIService.DATE_PATTERN);
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(ConstantValues.AikeAIService.DATE_PATTERN);
 
     private final ChatClient chatClient;
     private final CabinService cabinService;
-    private final ReservationsService reservationsService;
+    private final ReservationService reservationService;
 
     @Autowired
     public AikeAIServiceImpl(ChatClient.Builder chatClientBuilder,
                              CabinService cabinService,
-                             ReservationsService reservationsService) {
+                             ReservationService reservationService) {
         this.chatClient = chatClientBuilder.build();
         this.cabinService = cabinService;
-        this.reservationsService = reservationsService;
+        this.reservationService = reservationService;
     }
 
     @Override
@@ -84,13 +83,13 @@ public class AikeAIServiceImpl implements AikeAIService {
                             ConstantValues.AikeAIService.USER_NOT_IDENTIFIED_TEMPLATE,
                             message);
                 } else {
-                    List<ReservationsEntity> myReservations = reservationsService.obtenerReservasPorUsuario(userId);
+                    List<ReservationDTO> myReservations = reservationService.findByUserId(userId);
 
                     String reservationLines = myReservations.stream()
                             .map(reserva -> String.format(
                                     "- Reserva ID: %d | Cabaña ID: %d | Desde: %s | Hasta: %s | Estado: %s",
                                     reserva.getId(),
-                                    reserva.getCabinId(),
+                                    reserva.getId(),
                                     reserva.getStartDate().format(DATE_FORMATTER),
                                     reserva.getEndDate().format(DATE_FORMATTER),
                                     reserva.getStatus()))

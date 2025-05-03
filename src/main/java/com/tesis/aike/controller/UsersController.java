@@ -1,60 +1,56 @@
-package com.tesis.aike.controller; // Asegúrate de usar el paquete correcto para tus controladores
+package com.tesis.aike.controller;
 
-import com.tesis.aike.model.entity.UsersEntity;
-import com.tesis.aike.service.UsersService; // Asegúrate de que la ruta a tu servicio sea correcta
+import com.tesis.aike.model.dto.UserDTO;
+import com.tesis.aike.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 public class UsersController {
+    private final UserService service;
 
     @Autowired
-    private UsersService usersService;
+    public UsersController(UserService service) {
+        this.service = service;
+    }
 
     @GetMapping
-    public ResponseEntity<List<UsersEntity>> obtenerTodosLosUsuarios() {
-        List<UsersEntity> users = usersService.obtenerTodosLosUsuarios();
-        return new ResponseEntity<>(users, HttpStatus.OK);
+    public ResponseEntity<List<UserDTO>> all() {
+        return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UsersEntity> obtenerUsuarioPorId(@PathVariable int id) {
-        Optional<UsersEntity> user = usersService.obtenerUsuarioPorId(id);
-        return user.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<UserDTO> byId(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.findById(id));
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<UserDTO> byEmail(@PathVariable String email) {
+        return ResponseEntity.ok(service.findByEmail(email));
+    }
+
+    @GetMapping("/dni/{dni}")
+    public ResponseEntity<UserDTO> byDni(@PathVariable String dni) {
+        return ResponseEntity.ok(service.findByDni(dni));
     }
 
     @PostMapping
-    public ResponseEntity<UsersEntity> crearUsuario(@RequestBody UsersEntity user) {
-        UsersEntity nuevoUsuario = usersService.guardarUsuario(user);
-        return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
+    public ResponseEntity<UserDTO> create(@RequestBody UserDTO dto) {
+        return ResponseEntity.ok(service.create(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsersEntity> actualizarUsuario(@PathVariable int id, @RequestBody UsersEntity userActualizado) {
-        Optional<UsersEntity> userExistente = usersService.obtenerUsuarioPorId(id);
-        if (userExistente.isPresent()) {
-            userActualizado.setId(id);
-            UsersEntity usuarioActualizado = usersService.guardarUsuario(userActualizado);
-            return new ResponseEntity<>(usuarioActualizado, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<UserDTO> update(@PathVariable Integer id, @RequestBody UserDTO dto) {
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarUsuario(@PathVariable int id) {
-        if (usersService.obtenerUsuarioPorId(id).isPresent()) {
-            usersService.eliminarUsuario(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

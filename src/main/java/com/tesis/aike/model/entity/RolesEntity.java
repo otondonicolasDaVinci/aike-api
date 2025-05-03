@@ -3,14 +3,13 @@ package com.tesis.aike.model.entity;
 import jakarta.persistence.*;
 
 import java.util.Objects;
-
 @Entity
 @Table(name = "roles", schema = "public", catalog = "aike")
 public class RolesEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
-    private int id;
+    private Integer id;
     @Basic
     @Column(name = "name", nullable = false, length = 50)
     private String name;
@@ -19,7 +18,7 @@ public class RolesEntity {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
