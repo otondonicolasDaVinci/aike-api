@@ -1,267 +1,167 @@
 package com.tesis.aike.service.impl;
 
-import com.tesis.aike.helper.mapper.CabinMapper;
+import com.tesis.aike.helper.ConstantValues;
 import com.tesis.aike.model.dto.CabinDTO;
-import com.tesis.aike.model.entity.CabinEntity;
-import com.tesis.aike.model.entity.ReservationsEntity; // Importar entidad de Reservas
+import com.tesis.aike.model.entity.ReservationsEntity;
 import com.tesis.aike.service.AikeAIService;
 import com.tesis.aike.service.CabinService;
 import com.tesis.aike.service.ReservationsService;
+import com.tesis.aike.utils.QueryDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication; // Necesario para SecurityContextHolder
-import org.springframework.security.core.context.SecurityContextHolder; // Necesario para obtener usuario autenticado
-import org.springframework.security.core.userdetails.User; // O tu clase de usuario personalizada
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.time.format.DateTimeFormatter; // Para formatear fechas
 
 @Service
 public class AikeAIServiceImpl implements AikeAIService {
 
     private static final Logger logger = LoggerFactory.getLogger(AikeAIServiceImpl.class);
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATE_FORMATTER =
+            DateTimeFormatter.ofPattern(ConstantValues.AikeAIService.DATE_PATTERN);
 
     private final ChatClient chatClient;
     private final CabinService cabinService;
     private final ReservationsService reservationsService;
 
-    private final CabinMapper cabinMapper;
-
     @Autowired
-    public AikeAIServiceImpl(ChatClient.Builder chatClientBuilder, CabinService cabinService, ReservationsService reservationsService, CabinMapper cabinMapper) {
+    public AikeAIServiceImpl(ChatClient.Builder chatClientBuilder,
+                             CabinService cabinService,
+                             ReservationsService reservationsService) {
         this.chatClient = chatClientBuilder.build();
         this.cabinService = cabinService;
         this.reservationsService = reservationsService;
-        this.cabinMapper = cabinMapper;
     }
 
     @Override
-    public String obtenerRespuestaChat(String mensaje) {
-        // --- Alternativa si NO usas Spring Security ---
-        // Necesitarías cambiar la firma del método, por ejemplo:
-        // public String obtenerRespuestaChat(String mensaje, int userId) {
-        // O pasar algún objeto User que contenga el ID.
-        // ---
-
-        if (mensaje == null || mensaje.trim().isEmpty()) {
-            return "El mensaje no puede estar vacío. Por favor, escribe algo.";
+    public String promptResponse(String message) {
+        if (message == null || message.trim().isEmpty()) {
+            return ConstantValues.AikeAIConstant.EMPTY_PROMPT;
         }
 
-        String promptParaEnviar = mensaje;
-        boolean consultaCabanas = detectarConsultaCabanasDisponibles(mensaje);
-        boolean consultaMisReservas = detectarConsultaMisReservas(mensaje);
+        String promptToSend = message;
+        boolean askCabins = QueryDetector.isAvailableCabinsQuery(message);
+        boolean askMyReservations = QueryDetector.isReservationQuery(message);
 
-        // --- Lógica para Cabañas Disponibles ---
-        if (consultaCabanas) {
-            logger.info("Detectada pregunta sobre disponibilidad de cabañas.");
+        if (askCabins) {
             try {
                 List<CabinDTO> availableCabins = cabinService.findByAvailableTrue();
-                String infoCabanas;
-                if (availableCabins.isEmpty()) {
-                    infoCabanas = "Actualmente no hay cabañas disponibles según nuestros registros.";
-                    logger.info("No se encontraron cabañas disponibles en la BD.");
-                } else {
-                    infoCabanas = "Según nuestros registros, las siguientes cabañas están disponibles:\n" +
-                            availableCabins.stream()
-                                    .map(cabana -> String.format("- Cabaña '%s' (Capacidad: %d)%s",
-                                            cabana.getName(),
-                                            cabana.getCapacity(),
-                                            (cabana.getDescription() != null && !cabana.getDescription().trim().isEmpty()) ? ": " + cabana.getDescription() : ""
-                                    ))
-                                    .collect(Collectors.joining("\n"));
-                    logger.info("Se encontraron {} cabañas disponibles.", availableCabins.size());
-                }
+                String cabinLines = availableCabins.stream()
+                        .map(cabana -> String.format("- Cabaña '%s' (Capacidad: %d)%s",
+                                cabana.getName(),
+                                cabana.getCapacity(),
+                                cabana.getDescription() != null && !cabana.getDescription().trim().isEmpty()
+                                        ? ": " + cabana.getDescription()
+                                        : ""))
+                        .collect(Collectors.joining("\n"));
 
-                promptParaEnviar = String.format(
-                        "Contexto de la base de datos sobre cabañas disponibles:\n%s\n\n" +
-                                "Pregunta del usuario: \"%s\"\n\n" +
-                                "Instrucción: Responde a la pregunta del usuario de forma amigable y conversacional, " +
-                                "utilizando ÚNICAMENTE la información del contexto proporcionado sobre las cabañas disponibles. " +
-                                "No inventes disponibilidad ni detalles adicionales.",
-                        infoCabanas,
-                        mensaje
+                String cabinsInfo = availableCabins.isEmpty()
+                        ? ConstantValues.AikeAIService.NO_AVAILABLE_CABINS
+                        : String.format(ConstantValues.AikeAIService.AVAILABLE_CABINS_TEMPLATE, cabinLines);
+
+                promptToSend = String.format(
+                        ConstantValues.AikeAIService.CONTEXT_CABINS_PROMPT,
+                        cabinsInfo,
+                        message
                 );
-                logger.debug("Prompt enviado a ChatGPT con contexto de cabañas: {}", promptParaEnviar);
-
             } catch (Exception e) {
-                logger.error("Error al obtener o formatear información de cabañas: {}", e.getMessage(), e);
-                return "Lo siento, tuve problemas para consultar la disponibilidad actual de las cabañas. Por favor, intenta de nuevo más tarde.";
+                logger.error("Error al obtener información de cabañas: {}", e.getMessage(), e);
+                return ConstantValues.AikeAIService.ERROR_CABINS;
             }
-        }
-        // --- Lógica para Mis Reservas ---
-        else if (consultaMisReservas) {
-            logger.info("Detectada pregunta sobre las reservas del usuario.");
+        } else if (askMyReservations) {
             try {
-                // 1. Obtener el ID del usuario autenticado (¡IMPORTANTE!)
-                Integer userId = 1; // Llama al nuevo método helper
+                Integer userId = getAuthenticatedUserId();
 
                 if (userId == null) {
-                    logger.warn("No se pudo obtener el ID del usuario autenticado para consultar reservas.");
-                    // Informar al LLM que no se pudo identificar al usuario
-                    promptParaEnviar = String.format(
-                            "El usuario preguntó sobre sus reservas, pero no pude identificar quién es el usuario para buscar en la base de datos. " +
-                                    "Informa amablemente al usuario que necesitas saber quién es (o que necesita iniciar sesión) para poder mostrarle sus reservas. " +
-                                    "Pregunta original del usuario: \"%s\"",
-                            mensaje);
-
+                    promptToSend = String.format(
+                            ConstantValues.AikeAIService.USER_NOT_IDENTIFIED_TEMPLATE,
+                            message);
                 } else {
-                    logger.info("Consultando reservas para el usuario ID: {}", userId);
-                    // 2. Consultar reservas del usuario
-                    List<ReservationsEntity> misReservas = reservationsService.obtenerReservasPorUsuario(userId);
+                    List<ReservationsEntity> myReservations = reservationsService.obtenerReservasPorUsuario(userId);
 
-                    // 3. Formatear información
-                    String infoMisReservas;
-                    if (misReservas.isEmpty()) {
-                        infoMisReservas = "Según nuestros registros, no tienes ninguna reserva realizada.";
-                        logger.info("No se encontraron reservas para el usuario ID: {}", userId);
-                    } else {
-                        infoMisReservas = "Según nuestros registros, estas son tus reservas:\n" +
-                                misReservas.stream()
-                                        // Asumiendo que ReservationsEntity tiene estos métodos:
-                                        // getId(), getCabinId() (o getCabin().getName()), getStartDate(), getEndDate(), getStatus()
-                                        .map(reserva -> String.format("- Reserva ID: %d | Cabaña ID: %d | Desde: %s | Hasta: %s | Estado: %s",
-                                                reserva.getId(),
-                                                reserva.getCabinId(), // O: reserva.getCabin().getName() si tienes la relación cargada
-                                                reserva.getStartDate().format(DATE_FORMATTER),
-                                                reserva.getEndDate().format(DATE_FORMATTER),
-                                                reserva.getStatus()
-                                        ))
-                                        .collect(Collectors.joining("\n"));
-                        logger.info("Se encontraron {} reservas para el usuario ID: {}", misReservas.size(), userId);
-                    }
+                    String reservationLines = myReservations.stream()
+                            .map(reserva -> String.format(
+                                    "- Reserva ID: %d | Cabaña ID: %d | Desde: %s | Hasta: %s | Estado: %s",
+                                    reserva.getId(),
+                                    reserva.getCabinId(),
+                                    reserva.getStartDate().format(DATE_FORMATTER),
+                                    reserva.getEndDate().format(DATE_FORMATTER),
+                                    reserva.getStatus()))
+                            .collect(Collectors.joining("\n"));
 
-                    // 4. Construir prompt para la IA
-                    promptParaEnviar = String.format(
-                            "Contexto de la base de datos sobre las reservas del usuario (ID: %d):\n%s\n\n" +
-                                    "Pregunta del usuario: \"%s\"\n\n" +
-                                    "Instrucción: Responde a la pregunta del usuario de forma amigable y conversacional, " +
-                                    "presentando la información del contexto sobre SUS reservas. " +
-                                    "Usa SÓLO esta información. No inventes reservas ni detalles.",
-                            userId, // Incluir ID para posible referencia interna del LLM
-                            infoMisReservas,
-                            mensaje
+                    String reservationsInfo = myReservations.isEmpty()
+                            ? ConstantValues.AikeAIService.NO_RESERVATIONS
+                            : String.format(ConstantValues.AikeAIService.USER_RESERVATIONS_TEMPLATE, reservationLines);
+
+                    promptToSend = String.format(
+                            ConstantValues.AikeAIService.CONTEXT_RESERVATIONS_PROMPT,
+                            userId,
+                            reservationsInfo,
+                            message
                     );
-                    logger.debug("Prompt enviado a ChatGPT con contexto de MIS RESERVAS: {}", promptParaEnviar);
                 }
-
             } catch (Exception e) {
-                logger.error("Error al obtener o formatear información de MIS RESERVAS: {}", e.getMessage(), e);
-                return "Lo siento, tuve problemas para consultar tus reservas. Por favor, intenta de nuevo más tarde.";
+                logger.error("Error al obtener información de reservas: {}", e.getMessage(), e);
+                return ConstantValues.AikeAIService.ERROR_RESERVATIONS;
             }
         }
-        // --- Fin de la lógica ---
 
-
-        // --- Llamada final a la API de ChatGPT ---
         try {
-            logger.info("Enviando prompt a ChatClient...");
             return chatClient.prompt()
-                    .user(promptParaEnviar) // Usamos el prompt preparado (original o modificado)
+                    .user(promptToSend)
                     .call()
                     .content();
         } catch (Exception e) {
-            logger.error("Error al llamar a la API de Chat/OpenAI: {}", e.getMessage(), e);
-            return "Lo siento, hubo un error al procesar tu solicitud con el asistente virtual.";
+            logger.error("Error al llamar a la API OpenAI: {}", e.getMessage(), e);
+            return ConstantValues.AikeAIService.ERROR_OPENAI;
         }
     }
 
-    /**
-     * Método para detectar si el mensaje parece preguntar por cabañas DISPONIBLES.
-     */
-    private boolean detectarConsultaCabanasDisponibles(String mensaje) {
-        if (mensaje == null) return false;
-        String lowerCaseMensaje = mensaje.toLowerCase();
-        return lowerCaseMensaje.contains("cabañas disponibles") ||
-                lowerCaseMensaje.contains("disponibilidad") ||
-                lowerCaseMensaje.contains("cabaña libre") ||
-                lowerCaseMensaje.contains("cabañas libres") ||
-                lowerCaseMensaje.contains("qué cabañas hay") ||
-                lowerCaseMensaje.contains("consultar cabañas");
-        // Evitar que coincida con "mis reservas" si es posible
-    }
-
-    /**
-     * Método para detectar si el mensaje parece preguntar por las reservas PROPIAS del usuario.
-     */
-    private boolean detectarConsultaMisReservas(String mensaje) {
-        if (mensaje == null) return false;
-        String lowerCaseMensaje = mensaje.toLowerCase();
-        // Palabras clave específicas para las reservas del usuario
-        return lowerCaseMensaje.contains("mis reservas") ||
-                lowerCaseMensaje.contains("ver mis reservas") ||
-                lowerCaseMensaje.contains("reservas que hice") ||
-                lowerCaseMensaje.contains("mis reservaciones") || // Sinónimo
-                lowerCaseMensaje.contains("estado de mis reservas") ||
-                (lowerCaseMensaje.contains("reservas") && (lowerCaseMensaje.contains("mias") || lowerCaseMensaje.contains("mis")));
-    }
-
-    /**
-     * Obtiene el ID del usuario actualmente autenticado usando Spring Security.
-     *
-     * @return El ID del usuario como Integer, o null si no se puede obtener.
-     * ¡IMPORTANTE! Este método asume que el 'Principal' de Spring Security
-     * es un objeto User (o tu clase personalizada) y que su 'username'
-     * puede ser parseado a Integer como el ID de usuario.
-     * AJUSTA ESTO según cómo almacenes y representes el ID del usuario en tu sistema de autenticación.
-     */
-    private Integer obtenerIdUsuarioAutenticado() {
+    private Integer getAuthenticatedUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated() && !(authentication.getPrincipal() instanceof String && authentication.getPrincipal().equals("anonymousUser"))) {
-            Object principal = authentication.getPrincipal();
-            try {
-                if (principal instanceof User) { // Spring Security User class
-                    // Asumiendo que el username ES el ID del usuario como String
-                    return Integer.parseInt(((User) principal).getUsername());
-                } else if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User) {
-                    // Ejemplo si usas OAuth2/OIDC - ajusta según el atributo que contenga tu ID
-                    org.springframework.security.oauth2.core.user.OAuth2User oauth2User = (org.springframework.security.oauth2.core.user.OAuth2User) principal;
-                    String userIdStr = oauth2User.getAttribute("sub"); // 'sub' es común, pero podría ser otro campo
-                    return userIdStr != null ? Integer.parseInt(userIdStr) : null; // O Long.parseLong si es Long
-                } else if (principal instanceof String) {
-                    // Si el principal es directamente el ID como String
-                    return Integer.parseInt((String) principal);
-                }
-                // --- AÑADE AQUÍ LA LÓGICA PARA TU CLASE DE USUARIO PERSONALIZADA SI ES NECESARIO ---
-                // else if (principal instanceof MiUsuarioDetails) {
-                //    return ((MiUsuarioDetails) principal).getId(); // Asumiendo que tu clase tiene un getId()
-                // }
-
-                logger.warn("Tipo de Principal no reconocido o no contiene ID de usuario parseable: {}", principal.getClass().getName());
-                return null; // O lanza una excepción si prefieres
-
-            } catch (NumberFormatException e) {
-                logger.error("Error al parsear el ID de usuario desde el Principal ('{}'). Asegúrate de que el Principal contenga un ID numérico.", principal, e);
-                return null;
-            } catch (Exception e) {
-                logger.error("Error inesperado al obtener ID de usuario desde Principal: {}", e.getMessage(), e);
-                return null;
-            }
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
         }
-        logger.debug("No hay usuario autenticado o es anónimo.");
-        return null; // No autenticado o anónimo
+
+        Object principal = authentication.getPrincipal();
+        try {
+            if (principal instanceof User user) {
+                return Integer.parseInt(user.getUsername());
+            }
+            if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User oauth) {
+                String id = oauth.getAttribute("sub");
+                return id != null ? Integer.parseInt(id) : null;
+            }
+            if (principal instanceof String str) {
+                return Integer.parseInt(str);
+            }
+        } catch (Exception e) {
+            logger.error("No se pudo obtener ID de usuario autenticado: {}", e.getMessage(), e);
+        }
+        return null;
     }
 
-
-    // --- Método obtenerRespuestaConRolSistema sin cambios ---
-    public String obtenerRespuestaConRolSistema(String mensajeSistema, String mensajeUsuario) {
-        if (mensajeUsuario == null || mensajeUsuario.trim().isEmpty()) {
-            return "El mensaje no puede estar vacío. Por favor, escribe algo.";
+    public String systemRoleResponse(String systemMessage, String userMessage) {
+        if (userMessage == null || userMessage.trim().isEmpty()) {
+            return ConstantValues.AikeAIConstant.EMPTY_PROMPT;
         }
 
         try {
             return chatClient.prompt()
-                    .system(mensajeSistema)
-                    .user(mensajeUsuario)
+                    .system(systemMessage)
+                    .user(userMessage)
                     .call()
                     .content();
         } catch (Exception e) {
             logger.error("Error al usar rol de sistema con OpenAI: {}", e.getMessage());
-            return "Lo siento, hubo un error al procesar tu solicitud con rol.";
+            return ConstantValues.AikeAIService.ERROR_OPENAI;
         }
     }
 }

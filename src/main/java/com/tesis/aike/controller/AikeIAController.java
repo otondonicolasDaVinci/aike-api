@@ -1,6 +1,6 @@
 package com.tesis.aike.controller;
 
-import com.tesis.aike.helper.ConstantsValues;
+import com.tesis.aike.helper.ConstantValues;
 import com.tesis.aike.service.impl.AikeAIServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/ia")
+@RequestMapping("/v1/aike/ia/text")
 public class AikeIAController {
 
     private final AikeAIServiceImpl chatGptService;
@@ -19,13 +19,13 @@ public class AikeIAController {
         this.chatGptService = chatGptService;
     }
 
-    @PostMapping("/chat")
-    public ResponseEntity<String> enviarPregunta(@RequestBody Map<String, String> payload) {
-        String pregunta = payload.get(ConstantsValues.AikeAIConstants.PREGUNTA);
-        if (pregunta == null || pregunta.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(ConstantsValues.AikeAIConstants.PREGUNTA_VACIA);
+    @PostMapping("/prompt")
+    public ResponseEntity<String> sendTextPrompt(@RequestBody Map<String, String> payload) {
+        String prompt = payload.get(ConstantValues.AikeAIConstant.PROMPT);
+        if (prompt == null || prompt.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(ConstantValues.AikeAIConstant.EMPTY_PROMPT);
         }
-        String respuesta = chatGptService.obtenerRespuestaChat(pregunta);
-        return ResponseEntity.ok(respuesta);
+        return ResponseEntity.ok(chatGptService.promptResponse(prompt));
+
     }
 }

@@ -4,5 +4,5 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface AikeAIService {
-    String obtenerRespuestaChat(String pregunta);
+    String promptResponse(String pregunta);
 }
