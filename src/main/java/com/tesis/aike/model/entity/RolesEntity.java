@@ -3,9 +3,6 @@ package com.tesis.aike.model.entity;
 import jakarta.persistence.*;
 
 import java.util.Objects;
-
-
-//TODO: ¿Por qué Roles es una entidad y no manejamos los roles como un enum o directamente en la entidad UsersEntity?
 @Entity
 @Table(name = "roles", schema = "public", catalog = "aike")
 public class RolesEntity {
