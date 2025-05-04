@@ -1,6 +1,6 @@
 # Aike: Sistema de Gestión de Complejos de Cabañas
 
-**Versión Actual:** 0.1 
+**Versión Actual:** 1.0.1 
 **Autor:** Mario Exequiel Acosta, Nicolas Otondo, Lucas Gomez, Florencia Verratti.
 
 ---
