@@ -14,7 +14,7 @@ public class JwtTokenUtil {
 
     private final Key key;
 
-    public JwtTokenUtil(@Value("${jwt.secret.key}") String secret) {
+    public JwtTokenUtil(@Value("${jwt.secret.key}") String secret) { //TODO: Configurar en variables de entorno nombre JWT_SECRET_KEY valor: 0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF.
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
