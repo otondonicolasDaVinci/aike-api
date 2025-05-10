@@ -43,7 +43,7 @@ public class AikeAIServiceImpl implements AikeAIService {
         if (msg == null || msg.trim().isEmpty())
             return ConstantValues.AikeAIConstant.EMPTY_PROMPT;
 
-        Integer uid = getUserId();
+        Long uid = getUserId();
         boolean isAdmin = currentUserIsAdmin();
 
         if (QueryDetector.isSensitiveDataQuery(msg) && !isAdmin)
@@ -90,7 +90,7 @@ public class AikeAIServiceImpl implements AikeAIService {
             if (!isAdmin) return "Necesitas permisos de administrador para ver todas las reservas.";
             try {
                 List<ReservationDTO> list = resSvc.findAll();
-                prompt = buildReservationContext(-1, list, msg); // -1 indica contexto global
+                prompt = buildReservationContext(-1L, list, msg); // -1 indica contexto global
             } catch (Exception e) {
                 logger.error(ConstantValues.LoggerMessages.ERROR_FETCH_RESERVATIONS, e.getMessage(), e);
                 return ConstantValues.AikeAIService.ERROR_RESERVATIONS;
@@ -105,7 +105,7 @@ public class AikeAIServiceImpl implements AikeAIService {
         }
     }
 
-    private String buildReservationContext(Integer uid, List<ReservationDTO> list, String originalMsg) {
+    private String buildReservationContext(Long uid, List<ReservationDTO> list, String originalMsg) {
         String lines = list.stream()
                 .map(r -> String.format(ConstantValues.AikeAIService.RESERVATION_LINE_TEMPLATE,
                         r.getId(), r.getCabin().getName(),
@@ -119,17 +119,17 @@ public class AikeAIServiceImpl implements AikeAIService {
         return String.format(ConstantValues.AikeAIService.CONTEXT_RESERVATIONS_PROMPT, uid, info, originalMsg);
     }
 
-    private Integer getUserId() {
+    private Long getUserId() {
         Authentication a = SecurityContextHolder.getContext().getAuthentication();
         if (a == null || !a.isAuthenticated()) return null;
         Object p = a.getPrincipal();
         try {
-            if (p instanceof User u) return Integer.parseInt(u.getUsername());
+            if (p instanceof User u) return Long.parseLong(u.getUsername());
             if (p instanceof org.springframework.security.oauth2.core.user.OAuth2User o) {
                 String id = o.getAttribute("sub");
-                return id == null ? null : Integer.parseInt(id);
+                return id == null ? null : Long.parseLong(id);
             }
-            if (p instanceof String s) return Integer.parseInt(s);
+            if (p instanceof String s) return Long.parseLong(s);
         } catch (Exception e) {
             logger.error(ConstantValues.LoggerMessages.ERROR_AUTH_ID, e.getMessage(), e);
         }

@@ -48,8 +48,8 @@ public class ReservationServiceImpl implements ReservationService {
         return toDTOFull(saved);
     }
 
-    public ReservationDTO update(Integer id, ReservationDTO dto) {
-        ReservationsEntity entity = repository.findById(id).orElseThrow(() ->
+    public ReservationDTO update(Long id, ReservationDTO dto) {
+        ReservationsEntity entity = repository.findById(Math.toIntExact(id)).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, ConstantValues.ReservationService.NOT_FOUND));
         validateAvailability(entity.getCabinId(), dto.getStartDate(), dto.getEndDate());
         entity.setStartDate(dto.getStartDate());
@@ -58,20 +58,20 @@ public class ReservationServiceImpl implements ReservationService {
         return toDTOFull(entity);
     }
 
-    public void delete(Integer id) {
-        repository.deleteById(id);
+    public void delete(Long id) {
+        repository.deleteById(Math.toIntExact(id));
     }
 
-    public ReservationDTO findById(Integer id) {
-        return toDTOFull(repository.findById(id).orElseThrow(() ->
+    public ReservationDTO findById(Long id) {
+        return toDTOFull(repository.findById(Math.toIntExact(id)).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, ConstantValues.ReservationService.NOT_FOUND)));
     }
 
-    public List<ReservationDTO> findByUserId(Integer userId) {
+    public List<ReservationDTO> findByUserId(Long userId) {
         return repository.findByUserId(userId).stream().map(this::toDTOFull).toList();
     }
 
-    private void validateAvailability(Integer cabinId, LocalDate start, LocalDate end) {
+    private void validateAvailability(Long cabinId, LocalDate start, LocalDate end) {
         boolean overlaps = repository.existsByCabinIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
                 cabinId, end, start);
         if (overlaps) throw new ResponseStatusException(
@@ -81,7 +81,7 @@ public class ReservationServiceImpl implements ReservationService {
     private ReservationDTO toDTOFull(ReservationsEntity entity) {
         ReservationDTO dto = mapper.toDTO(entity);
 
-        usersRepository.findById(entity.getUserId()).ifPresent(u -> {
+        usersRepository.findById(Math.toIntExact(entity.getUserId())).ifPresent(u -> {
             UserDTO user = new UserDTO();
             user.setId(u.getId());
             user.setName(u.getName());
@@ -89,7 +89,7 @@ public class ReservationServiceImpl implements ReservationService {
             dto.setUser(user);
         });
 
-        cabinRepository.findById(entity.getCabinId()).ifPresent(c -> {
+        cabinRepository.findById(Math.toIntExact(entity.getCabinId())).ifPresent(c -> {
             CabinDTO cabin = new CabinDTO();
             cabin.setId(c.getId());
             cabin.setName(c.getName());

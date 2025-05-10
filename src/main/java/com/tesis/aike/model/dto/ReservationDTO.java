@@ -8,14 +8,14 @@ import java.time.LocalDate;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReservationDTO {
-    private Integer id;
+    private Long id;
     private UserDTO user;
     private CabinDTO cabin;
     private LocalDate startDate;
     private LocalDate endDate;
     private String status;
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
@@ -39,7 +39,7 @@ public class ReservationDTO {
         return status;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

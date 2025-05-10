@@ -11,7 +11,7 @@ public class NotificationsEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
-    private int id;
+    private Long id;
     @Basic
     @Column(name = "user_id", nullable = false)
     private int userId;
@@ -25,11 +25,11 @@ public class NotificationsEntity {
     @Column(name = "created_at", nullable = true)
     private Timestamp createdAt;
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

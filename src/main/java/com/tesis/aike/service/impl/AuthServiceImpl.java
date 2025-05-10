@@ -27,9 +27,9 @@ public class AuthServiceImpl implements AuthService {
         this.jwt = jwt;
     }
 
-    public String login(Integer userId, String rawPassword) {
-
-        UsersEntity user = usersRepo.findById(userId)
+    @Override
+    public String login(Long userId, String rawPassword) {
+        UsersEntity user = usersRepo.findById(Math.toIntExact(userId))
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.UNAUTHORIZED, ConstantValues.Security.LOGIN_FAILED));
 
@@ -37,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, ConstantValues.Security.LOGIN_FAILED);
         }
 
-        RolesEntity role = rolesRepo.findById(user.getRoleId()).orElse(null);
+        RolesEntity role = rolesRepo.findById(Math.toIntExact(user.getRoleId())).orElse(null);
         String roleNameDb = role == null ? "CLIENT" : role.getName().toUpperCase();
         String roleName = roleNameDb.startsWith("ADMIN") ? "ADMIN" : "CLIENT";
 

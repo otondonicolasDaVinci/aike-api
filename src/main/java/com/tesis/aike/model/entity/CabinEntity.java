@@ -10,7 +10,7 @@ public class CabinEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
-    private int id;
+    private Long id;
     @Basic
     @Column(name = "name", nullable = false, length = 100)
     private String name;
@@ -24,11 +24,11 @@ public class CabinEntity {
     @Column(name = "available", nullable = true)
     private Boolean available;
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

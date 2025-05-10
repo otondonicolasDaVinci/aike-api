@@ -18,5 +18,5 @@ public interface UsersRepository extends JpaRepository<UsersEntity, Integer> {
     Optional<UsersEntity> findByDni(String dni);
 
     // Ejemplo de método personalizado para buscar todos los usuarios con un role_id específico
-    java.util.List<UsersEntity> findByRoleId(int roleId);
+    java.util.List<UsersEntity> findByRoleId(Long roleId);
 }

@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface ReservationService {
     ReservationDTO create(ReservationDTO dto);
-    ReservationDTO update(Integer id, ReservationDTO dto);
-    void delete(Integer id);
-    ReservationDTO findById(Integer id);
-    List<ReservationDTO> findByUserId(Integer userId);
+    ReservationDTO update(Long id, ReservationDTO dto);
+    void delete(Long id);
+    ReservationDTO findById(Long id);
+    List<ReservationDTO> findByUserId(Long userId);
     List<ReservationDTO> findAll();
 }
