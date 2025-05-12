@@ -20,8 +20,15 @@ public class AikeSecurity {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                        .requestMatchers("/api/payments/webhook").permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/payments/success",
+                                "/api/payments/failure",
+                                "/api/payments/pending"
+                        ).permitAll()
                         .requestMatchers("/users/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/reservations").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/reservations").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenUtil),
                         UsernamePasswordAuthenticationFilter.class);

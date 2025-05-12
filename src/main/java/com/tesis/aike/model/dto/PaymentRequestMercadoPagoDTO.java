@@ -3,13 +3,11 @@ package com.tesis.aike.model.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
-import java.math.BigDecimal;
-
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PaymentRequestMercadoPagoDTO {
     private Integer reservationId;
-    private BigDecimal amount;
+    private Long amount;
     private String payerEmail;
 
     public Integer getReservationId() {
@@ -20,11 +18,11 @@ public class PaymentRequestMercadoPagoDTO {
         this.reservationId = reservationId;
     }
 
-    public BigDecimal getAmount() {
+    public Long getAmount() {
         return amount;
     }
 
-    public void setAmount(BigDecimal amount) {
+    public void setAmount(Long amount) {
         this.amount = amount;
     }
 

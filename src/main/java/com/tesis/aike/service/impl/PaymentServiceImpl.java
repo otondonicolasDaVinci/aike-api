@@ -1,12 +1,13 @@
 package com.tesis.aike.service.impl;
 
+import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.preference.*;
+import com.mercadopago.exceptions.MPApiException;
 import com.mercadopago.resources.payment.Payment;
 import com.mercadopago.resources.preference.Preference;
 import com.tesis.aike.model.dto.PaymentRequestMercadoPagoDTO;
 import com.tesis.aike.model.dto.PaymentResponseMercadoPagoDTO;
-import com.tesis.aike.model.dto.ReservationDTO;
 import com.tesis.aike.service.PaymentService;
 import com.tesis.aike.service.ReservationService;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     public PaymentServiceImpl(ReservationService reservationService) {
         this.reservationService = reservationService;
+        MercadoPagoConfig.setAccessToken(System.getenv("MP_ACCESS_TOKEN"));
     }
 
     @Override
@@ -29,25 +31,24 @@ public class PaymentServiceImpl implements PaymentService {
             PreferenceItemRequest item = PreferenceItemRequest.builder()
                     .title("Reserva #" + req.getReservationId())
                     .quantity(1)
-                    .unitPrice(new BigDecimal(req.getAmount().toString()))
+                    .unitPrice(BigDecimal.valueOf(req.getAmount()))
                     .build();
 
             PreferenceRequest preferenceRequest = PreferenceRequest.builder()
                     .items(List.of(item))
                     .payer(PreferencePayerRequest.builder()
-                            .email(req.getPayerEmail())
+                            .email("test_user_1060862931@testuser.com")
                             .build())
                     .backUrls(PreferenceBackUrlsRequest.builder()
-                            .success("https://example.com/success")
-                            .failure("https://example.com/failure")
-                            .pending("https://example.com/pending")
+                            .success("https://aab3-201-216-219-13.ngrok-free.app/api/payments/success")
+                            .failure("https://aab3-201-216-219-13.ngrok-free.app/api/payments/failure")
+                            .pending("https://aab3-201-216-219-13.ngrok-free.app/api/payments/pending")
                             .build())
                     .autoReturn("approved")
                     .externalReference(req.getReservationId().toString())
                     .build();
 
-            PreferenceClient client = new PreferenceClient();
-            Preference preference = client.create(preferenceRequest);
+            Preference preference = new PreferenceClient().create(preferenceRequest);
 
             PaymentResponseMercadoPagoDTO res = new PaymentResponseMercadoPagoDTO();
             res.setPaymentId(preference.getId());
@@ -63,18 +64,15 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public void processWebhook(Long paymentId) {
         try {
-            PaymentClient client = new PaymentClient();
-            Payment payment = client.get(paymentId);
-
+            Payment payment = new PaymentClient().get(paymentId);
             if (!"approved".equalsIgnoreCase(payment.getStatus())) return;
 
-            String externalRef = payment.getExternalReference();
-            Long reservationId = Long.valueOf(externalRef);
+            Long reservationId = Long.valueOf(payment.getExternalReference());
+            reservationService.updateStatus(reservationId, "PAID");
 
-            ReservationDTO dto = reservationService.findById(reservationId);
-            dto.setStatus("PAID");
-            reservationService.update(reservationId, dto);
-
+        } catch (MPApiException e) {
+            if (e.getApiResponse().getStatusCode() == 404) return;
+            throw new RuntimeException("MP error " + e.getApiResponse().getStatusCode(), e);
         } catch (Exception e) {
             throw new RuntimeException("Error al procesar webhook de Mercado Pago", e);
         }

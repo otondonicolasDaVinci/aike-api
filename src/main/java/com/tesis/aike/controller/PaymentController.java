@@ -1,11 +1,16 @@
 package com.tesis.aike.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tesis.aike.model.dto.PaymentRequestMercadoPagoDTO;
 import com.tesis.aike.model.dto.PaymentResponseMercadoPagoDTO;
 import com.tesis.aike.service.PaymentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.util.HexFormat;
 import java.util.Map;
 
 @RestController
@@ -19,16 +24,19 @@ public class PaymentController {
     }
 
     @PostMapping("/webhook")
-    public ResponseEntity<?> handleWebhook(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<Void> handleWebhook(@RequestBody String rawBody) {
         try {
-            Map<String, Object> data = (Map<String, Object>) body.get("data");
-            Long paymentId = Long.valueOf(data.get("id").toString());
+            Map<?, ?> body = new ObjectMapper().readValue(rawBody, Map.class);
+            Long paymentId = Long.valueOf(((Map<?, ?>) body.get("data")).get("id").toString());
+
             paymentService.processWebhook(paymentId);
             return ResponseEntity.ok().build();
+
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Webhook inválido");
+            return ResponseEntity.status(500).build();
         }
     }
+
 
     @PostMapping
     public ResponseEntity<PaymentResponseMercadoPagoDTO> createPayment(@RequestBody PaymentRequestMercadoPagoDTO request) {

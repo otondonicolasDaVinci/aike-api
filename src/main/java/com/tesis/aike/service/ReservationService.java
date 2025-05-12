@@ -12,4 +12,5 @@ public interface ReservationService {
     ReservationDTO findById(Long id);
     List<ReservationDTO> findByUserId(Long userId);
     List<ReservationDTO> findAll();
+    void updateStatus(Long id, String status);
 }

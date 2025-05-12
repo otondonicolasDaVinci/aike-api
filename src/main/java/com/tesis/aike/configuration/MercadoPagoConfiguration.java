@@ -12,6 +12,9 @@ public class MercadoPagoConfiguration {
     @Value("${mercadopago.access-token}")
     private String accessToken;
 
+    @Value("${mercadopago.webhook-secret}")
+    private String webHookSecret;
+
     @PostConstruct
     public void init() {
         MercadoPagoConfig.setAccessToken(accessToken);

@@ -42,6 +42,16 @@ public class ReservationServiceImpl implements ReservationService {
         return repository.findAll().stream().map(this::toDTOFull).toList();
     }
 
+    @Override
+    public void updateStatus(Long id, String status) {
+        ReservationsEntity entity = repository.findById(Math.toIntExact(id))
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, ConstantValues.ReservationService.NOT_FOUND));
+        entity.setStatus(status);
+        repository.save(entity);
+    }
+
+
     public ReservationDTO create(ReservationDTO dto) {
         validateAvailability(dto.getCabin().getId(), dto.getStartDate(), dto.getEndDate());
         ReservationsEntity saved = repository.save(mapper.toEntity(dto));
