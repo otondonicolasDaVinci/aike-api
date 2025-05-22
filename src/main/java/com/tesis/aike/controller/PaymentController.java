@@ -35,7 +35,6 @@ public class PaymentController {
             System.out.println("Webhook recibido con body: " + rawBody);
             Map<?, ?> body = new ObjectMapper().readValue(rawBody, Map.class);
             Long paymentId = Long.valueOf(((Map<?, ?>) body.get("data")).get("id").toString());
-
             paymentService.processWebhook(paymentId);
             return ResponseEntity.ok().build();
 
