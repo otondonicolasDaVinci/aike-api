@@ -9,13 +9,13 @@ public class ReservationsEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(name = "user_id", nullable = false)
-    private int userId;
+    private Long userId;
 
     @Column(name = "cabin_id", nullable = false)
-    private int cabinId;
+    private Long cabinId;
 
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
@@ -27,27 +27,27 @@ public class ReservationsEntity {
     private String status;
 
     // Getters y Setters generados con Lombok
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public int getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
-    public int getCabinId() {
+    public Long getCabinId() {
         return cabinId;
     }
 
-    public void setCabinId(int cabinId) {
+    public void setCabinId(Long cabinId) {
         this.cabinId = cabinId;
     }
 

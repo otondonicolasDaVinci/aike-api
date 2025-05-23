@@ -9,9 +9,9 @@ import java.util.List;
 
 @Repository
 public interface ReservationsRepository extends JpaRepository<ReservationsEntity, Integer> {
-    List<ReservationsEntity> findByUserId(Integer userId);
+    List<ReservationsEntity> findByUserId(Long userId);
 
-    List<ReservationsEntity> findByCabinId(int cabinId);
+    List<ReservationsEntity> findByCabinId(Long cabinId);
 
     List<ReservationsEntity> findByStartDateLessThanEqualAndEndDateGreaterThanEqual(LocalDate startDate, LocalDate endDate);
 
@@ -21,6 +21,5 @@ public interface ReservationsRepository extends JpaRepository<ReservationsEntity
 
     List<ReservationsEntity> findByEndDate(LocalDate endDate);
 
-    List<ReservationsEntity> findByCabinId(Integer cabinId);
-    boolean existsByCabinIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(Integer cabinId, LocalDate startDate, LocalDate endDate);
+    boolean existsByCabinIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(Long cabinId, LocalDate startDate, LocalDate endDate);
 }

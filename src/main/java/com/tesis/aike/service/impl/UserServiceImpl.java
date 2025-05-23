@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
 
     private UserDTO toDTOWithRoleName(UsersEntity entity) {
         UserDTO dto = mapper.toDTO(entity);
-        rolesRepo.findById(entity.getRoleId()).ifPresent(role -> {
+        rolesRepo.findById(entity.getRoleId().intValue()).ifPresent(role -> {
             RoleDTO r = new RoleDTO();
             r.setId(role.getId());
             r.setName(role.getName());

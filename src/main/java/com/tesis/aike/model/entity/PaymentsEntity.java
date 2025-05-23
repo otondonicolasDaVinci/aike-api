@@ -12,7 +12,7 @@ public class PaymentsEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
-    private int id;
+    private Long id;
     @Basic
     @Column(name = "reservation_id", nullable = false)
     private int reservationId;
@@ -29,11 +29,11 @@ public class PaymentsEntity {
     @Column(name = "status", nullable = true, length = 50)
     private String status;
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

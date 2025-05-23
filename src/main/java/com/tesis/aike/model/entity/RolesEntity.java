@@ -9,16 +9,16 @@ public class RolesEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
     @Basic
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

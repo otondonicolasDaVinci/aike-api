@@ -19,12 +19,12 @@ public class ReservationsController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ReservationDTO>> byUser(@PathVariable Integer userId) {
+    public ResponseEntity<List<ReservationDTO>> byUser(@PathVariable Long userId) {
         return ResponseEntity.ok(reservationService.findByUserId(userId));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReservationDTO> byId(@PathVariable Integer id) {
+    public ResponseEntity<ReservationDTO> byId(@PathVariable Long id) {
         return ResponseEntity.ok(reservationService.findById(id));
     }
 
@@ -34,12 +34,12 @@ public class ReservationsController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ReservationDTO> update(@PathVariable Integer id, @RequestBody ReservationDTO dto) {
+    public ResponseEntity<ReservationDTO> update(@PathVariable Long id, @RequestBody ReservationDTO dto) {
         return ResponseEntity.ok(reservationService.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         reservationService.delete(id);
         return ResponseEntity.noContent().build();
     }

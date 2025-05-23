@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 @Component
 public class JwtTokenUtil {
@@ -18,13 +21,17 @@ public class JwtTokenUtil {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generate(Integer userId, String role) {
+    public String generate(Long userId, String role) {
+        Instant now = Instant.now();
         return Jwts.builder()
                 .setSubject(userId.toString())
                 .claim("role", role)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(now.plus(2, ChronoUnit.MINUTES)))
                 .signWith(key)
                 .compact();
     }
+
 
     public Claims parse(String token) {
         return Jwts.parserBuilder()
