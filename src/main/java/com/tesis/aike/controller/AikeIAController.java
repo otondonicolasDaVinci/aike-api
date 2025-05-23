@@ -1,5 +1,6 @@
 package com.tesis.aike.controller;
 
+import com.tesis.aike.model.dto.ChatApiResponse;
 import com.tesis.aike.helper.ConstantValues;
 import com.tesis.aike.service.impl.AikeAIServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +21,17 @@ public class AikeIAController {
     }
 
     @PostMapping("/prompt")
-    public ResponseEntity<String> sendTextPrompt(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<?> sendTextPrompt(@RequestBody Map<String, String> payload) {
         String prompt = payload.get(ConstantValues.AikeAIConstant.PROMPT);
+
         if (prompt == null || prompt.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(ConstantValues.AikeAIConstant.EMPTY_PROMPT);
         }
-        return ResponseEntity.ok(chatGptService.promptResponse(prompt));
 
+        String iaResponseText = chatGptService.promptResponse(prompt);
+
+        ChatApiResponse apiResponse = new ChatApiResponse(iaResponseText);
+
+        return ResponseEntity.ok(apiResponse);
     }
 }
