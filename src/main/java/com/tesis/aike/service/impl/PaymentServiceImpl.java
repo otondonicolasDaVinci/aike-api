@@ -40,12 +40,13 @@ public class PaymentServiceImpl implements PaymentService {
                             .email("test_user_1060862931@testuser.com")
                             .build())
                     .backUrls(PreferenceBackUrlsRequest.builder()
-                            .success("https://217d-201-216-219-13.ngrok-free.app/api/payments/success")
-                            .failure("https://217d-201-216-219-13.ngrok-free.app/api/payments/failure")
-                            .pending("https://217d-201-216-219-13.ngrok-free.app/api/payments/pending")
+                            .success("https://f847-201-216-219-13.ngrok-free.app/api/payments/success")
+                            .failure("https://f847-201-216-219-13.ngrok-free.app/api/payments/failure")
+                            .pending("https://f847-201-216-219-13.ngrok-free.app/api/payments/pending")
                             .build())
                     .autoReturn("approved")
                     .externalReference(req.getReservationId().toString())
+                    .notificationUrl("https://f847-201-216-219-13.ngrok-free.app/api/payments/webhook") // 👈 IMPORTANTE
                     .build();
 
             Preference preference = new PreferenceClient().create(preferenceRequest);
@@ -60,6 +61,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new RuntimeException("Error creando preferencia de pago: " + e.getMessage(), e);
         }
     }
+
 
     @Override
     public void processWebhook(Long paymentId) {
