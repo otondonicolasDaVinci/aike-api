@@ -25,7 +25,8 @@ public class AikeSecurity {
                                 HttpMethod.GET,
                                 "/api/payments/success",
                                 "/api/payments/failure",
-                                "/api/payments/pending"
+                                "/api/payments/pending",
+                                "/api/qrcode/**"
                         ).permitAll()
                         .requestMatchers("/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/reservations").hasRole("ADMIN")

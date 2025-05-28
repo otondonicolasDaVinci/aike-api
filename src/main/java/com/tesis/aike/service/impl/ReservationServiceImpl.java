@@ -22,44 +22,44 @@ import java.util.List;
 @Service
 @Transactional
 public class ReservationServiceImpl implements ReservationService {
-    private final ReservationsRepository repository;
+    private final ReservationsRepository reservationsRepository;
     private final UsersRepository usersRepository;
     private final CabinRepository cabinRepository;
     private final ReservationMapper mapper;
 
     @Autowired
-    public ReservationServiceImpl(ReservationsRepository repository,
+    public ReservationServiceImpl(ReservationsRepository reservationsRepository,
                                   ReservationMapper mapper,
                                   UsersRepository usersRepository,
                                   CabinRepository cabinRepository) {
-        this.repository = repository;
+        this.reservationsRepository = reservationsRepository;
         this.mapper = mapper;
         this.usersRepository = usersRepository;
         this.cabinRepository = cabinRepository;
     }
 
     public List<ReservationDTO> findAll() {
-        return repository.findAll().stream().map(this::toDTOFull).toList();
+        return reservationsRepository.findAll().stream().map(this::toDTOFull).toList();
     }
 
     @Override
     public void updateStatus(Long id, String status) {
-        ReservationsEntity entity = repository.findById(Math.toIntExact(id))
+        ReservationsEntity entity = reservationsRepository.findById(Math.toIntExact(id))
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, ConstantValues.ReservationService.NOT_FOUND));
         entity.setStatus(status);
-        repository.save(entity);
+        reservationsRepository.save(entity);
     }
 
 
     public ReservationDTO create(ReservationDTO dto) {
         validateAvailability(dto.getCabin().getId(), dto.getStartDate(), dto.getEndDate());
-        ReservationsEntity saved = repository.save(mapper.toEntity(dto));
+        ReservationsEntity saved = reservationsRepository.save(mapper.toEntity(dto));
         return toDTOFull(saved);
     }
 
     public ReservationDTO update(Long id, ReservationDTO dto) {
-        ReservationsEntity entity = repository.findById(Math.toIntExact(id)).orElseThrow(() ->
+        ReservationsEntity entity = reservationsRepository.findById(Math.toIntExact(id)).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, ConstantValues.ReservationService.NOT_FOUND));
         validateAvailability(entity.getCabinId(), dto.getStartDate(), dto.getEndDate());
         entity.setStartDate(dto.getStartDate());
@@ -69,20 +69,20 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     public void delete(Long id) {
-        repository.deleteById(Math.toIntExact(id));
+        reservationsRepository.deleteById(Math.toIntExact(id));
     }
 
     public ReservationDTO findById(Long id) {
-        return toDTOFull(repository.findById(Math.toIntExact(id)).orElseThrow(() ->
+        return toDTOFull(reservationsRepository.findById(Math.toIntExact(id)).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, ConstantValues.ReservationService.NOT_FOUND)));
     }
 
     public List<ReservationDTO> findByUserId(Long userId) {
-        return repository.findByUserId(userId).stream().map(this::toDTOFull).toList();
+        return reservationsRepository.findByUserId(userId).stream().map(this::toDTOFull).toList();
     }
 
     private void validateAvailability(Long cabinId, LocalDate start, LocalDate end) {
-        boolean overlaps = repository.existsByCabinIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+        boolean overlaps = reservationsRepository.existsByCabinIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
                 cabinId, end, start);
         if (overlaps) throw new ResponseStatusException(
                 HttpStatus.CONFLICT, ConstantValues.ReservationService.CABIN_NOT_AVAILABLE);
@@ -108,4 +108,10 @@ public class ReservationServiceImpl implements ReservationService {
 
         return dto;
     }
+
+    @Override
+    public boolean hasActiveReservation(Long userId) {
+        return reservationsRepository.existsActiveReservationByUserId(userId);
+    }
+
 }
