@@ -13,4 +13,6 @@ public interface ReservationService {
     List<ReservationDTO> findByUserId(Long userId);
     List<ReservationDTO> findAll();
     void updateStatus(Long id, String status);
+    boolean hasActiveReservation(Long userId);
+
 }

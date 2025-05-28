@@ -1,4 +1,4 @@
-package com.tesis.aike.service;
+package com.tesis.aike.service.impl;
 
 import com.tesis.aike.helper.ConstantValues;
 import com.tesis.aike.model.entity.UsersEntity;
@@ -10,11 +10,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CustomUserDetailsService implements UserDetailsService {
+public class CustomUserDetailsServiceImpl implements UserDetailsService {
 
     private final UsersRepository usersRepository;
 
-    public CustomUserDetailsService(UsersRepository usersRepository) {
+    public CustomUserDetailsServiceImpl(UsersRepository usersRepository) {
         this.usersRepository = usersRepository;
     }
 
