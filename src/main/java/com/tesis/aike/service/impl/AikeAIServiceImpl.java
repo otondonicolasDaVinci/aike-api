@@ -30,11 +30,23 @@ public class AikeAIServiceImpl implements AikeAIService {
     private final CabinService cabinSvc;
     private final ReservationService resSvc;
 
+    // <-- MODIFICACIÓN 1: Se añade la instrucción de sistema como una constante.
+    private static final String SYSTEM_INSTRUCTION = """
+            Eres un asistente virtual amigable y servicial para "Cabañas Aike".
+            Tu propósito principal es responder preguntas sobre la disponibilidad de cabañas y las reservas de los usuarios.
+            Basa tus respuestas estrictamente en la información de contexto que se te proporciona en cada prompt.
+            No ofrezcas información que no esté en el contexto. Si la pregunta del usuario no se puede responder con el contexto dado,
+            indica amablemente que no tienes acceso a esa información. Sé siempre cortés y profesional.
+            """;
+
     @Autowired
     public AikeAIServiceImpl(ChatClient.Builder builder,
                              CabinService cabinSvc,
                              ReservationService resSvc) {
-        this.chat = builder.build();
+        // <-- MODIFICACIÓN 2: Se configura el cliente de chat con el prompt de sistema por defecto.
+        this.chat = builder
+                .defaultSystem(SYSTEM_INSTRUCTION)
+                .build();
         this.cabinSvc = cabinSvc;
         this.resSvc = resSvc;
     }
@@ -53,7 +65,7 @@ public class AikeAIServiceImpl implements AikeAIService {
         boolean askOwnRes = QueryDetector.isReservationQuery(msg);
         boolean askAllRes = QueryDetector.isAllReservationsQuery(msg);
 
-        String prompt = msg;
+        String prompt;
 
         if (askCabins) {
             try {
@@ -95,10 +107,17 @@ public class AikeAIServiceImpl implements AikeAIService {
                 logger.error(ConstantValues.LoggerMessages.ERROR_FETCH_RESERVATIONS, e.getMessage(), e);
                 return ConstantValues.AikeAIService.ERROR_RESERVATIONS;
             }
+        } else {
+            return ConstantValues.AikeAIService.NOT_CONTEXT;
         }
 
+
         try {
-            return chat.prompt().user(prompt).call().content();
+            // Ya no es necesario pasar el rol "system" aquí, porque fue configurado por defecto.
+            return chat.prompt()
+                    .user(prompt)
+                    .call()
+                    .content();
         } catch (Exception e) {
             logger.error(ConstantValues.LoggerMessages.ERROR_CALL_OPENAI, e.getMessage(), e);
             return ConstantValues.AikeAIService.ERROR_OPENAI;
