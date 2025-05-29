@@ -1,13 +1,13 @@
 package com.tesis.aike.controller;
 
 import com.tesis.aike.helper.ConstantValues;
+import com.tesis.aike.security.JwtTokenUtil;
 import com.tesis.aike.service.AuthService;
+import com.tesis.aike.service.ReservationService;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -16,10 +16,16 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtTokenUtil jwtTokenUtil;
+    private final ReservationService reservationService;
 
     @Autowired
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService,
+                          JwtTokenUtil jwtTokenUtil,
+                          ReservationService reservationService) {
         this.authService = authService;
+        this.jwtTokenUtil = jwtTokenUtil;
+        this.reservationService = reservationService;
     }
 
     @PostMapping("/login")
@@ -31,6 +37,26 @@ public class AuthController {
             return ResponseEntity.ok(Map.of("token", token));
         } catch (Exception e) {
             return ResponseEntity.status(401).body(ConstantValues.Security.LOGIN_FAILED);
+        }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<String> refreshToken(@RequestHeader("Authorization") String bearerToken) {
+        try {
+            String token = bearerToken.replace("Bearer ", "");
+            Claims claims = jwtTokenUtil.parse(token);
+
+            Long userId = Long.valueOf(claims.getSubject());
+            if (!reservationService.hasActiveReservation(userId)) {
+                return ResponseEntity.status(403).body("El usuario no tiene una reserva activa");
+            }
+
+            String role = claims.get("role", String.class);
+            String newToken = jwtTokenUtil.generate(userId, role);
+            return ResponseEntity.ok(newToken);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Token inválido o expirado");
         }
     }
 }
