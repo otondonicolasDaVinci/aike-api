@@ -25,9 +25,9 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
         try {
-            Long id = body.get("userId") != null ? Long.valueOf(body.get("userId")) : null;
+            String user = body.get("user") != null ? body.get("user") : null;
             String pwd = body.get("password");
-            String token = authService.login(id, pwd);
+            String token = authService.login(user, pwd);
             return ResponseEntity.ok(Map.of("token", token));
         } catch (Exception e) {
             return ResponseEntity.status(401).body(ConstantValues.Security.LOGIN_FAILED);

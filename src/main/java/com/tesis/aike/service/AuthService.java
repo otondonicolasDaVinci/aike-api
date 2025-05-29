@@ -1,5 +1,5 @@
 package com.tesis.aike.service;
 
 public interface AuthService {
-    String login(Long userId, String rawPassword);
+    String login(String userId, String rawPassword);
 }

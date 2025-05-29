@@ -8,15 +8,12 @@ import java.util.Optional;
 
 @Repository
 public interface UsersRepository extends JpaRepository<UsersEntity, Integer> {
-    // JpaRepository proporciona métodos CRUD básicos (save, findById, findAll, deleteById, etc.)
-    // Puedes agregar métodos personalizados aquí si necesitas consultas específicas para la entidad Users.
 
-    // Ejemplo de método personalizado para buscar un usuario por su email
     Optional<UsersEntity> findByEmail(String email);
 
-    // Ejemplo de método personalizado para buscar un usuario por su DNI
     Optional<UsersEntity> findByDni(String dni);
 
-    // Ejemplo de método personalizado para buscar todos los usuarios con un role_id específico
-    java.util.List<UsersEntity> findByRoleId(Long roleId);
+    java.util.List<UsersEntity> findByRoleId(Long roleId); // TODO: ???
+
+    Optional<UsersEntity> findByName(String name);
 }
