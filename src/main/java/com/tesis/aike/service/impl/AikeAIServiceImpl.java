@@ -108,7 +108,7 @@ public class AikeAIServiceImpl implements AikeAIService {
                 return ConstantValues.AikeAIService.ERROR_RESERVATIONS;
             }
         } else {
-            return ConstantValues.AikeAIService.NOT_CONTEXT;
+            prompt = String.format(ConstantValues.AikeAIService.FALLBACK_GUIDANCE_PROMPT, msg);
         }
 
 

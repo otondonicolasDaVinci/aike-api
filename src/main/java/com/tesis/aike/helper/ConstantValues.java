@@ -20,7 +20,13 @@ public class ConstantValues {
         public static final String ERROR_RESERVATIONS = "Lo siento, tuve problemas para consultar tus reservas. Por favor, intenta de nuevo más tarde.";
         public static final String ERROR_OPENAI = "Lo siento, hubo un error al procesar tu solicitud con el asistente virtual.";
         public static final String RESERVATION_LINE_TEMPLATE = "- Reserva número: %d | Cabaña: %s | Desde: %s | Hasta: %s | Estado: %s";
-        public static final String NOT_CONTEXT = "El usuario ha hecho una pregunta que no parece estar relacionada con la disponibilidad de cabañas o la consulta de reservas.Pregunta del usuario: \"%s\"\nInstrucción: Responde amablemente que tu función es ayudar con información sobre las \"Cabañas Aike\", como la disponibilidad y gestión de reservas.\nNo intentes responder la pregunta original del usuario. Guíalo de vuelta a los temas relevantes.";
+        public static final String FALLBACK_GUIDANCE_PROMPT = """
+                El usuario ha hecho una pregunta que no parece estar relacionada con la disponibilidad de cabañas o la consulta de reservas.
+                Pregunta del usuario: "%s"
+
+                Instrucción: Responde amablemente que tu función es ayudar con información sobre las "Cabañas Aike", como la disponibilidad y gestión de reservas.
+                No intentes responder la pregunta original del usuario. Guíalo de vuelta a los temas relevantes.
+                """;
     }
 
     public static class ReservationService {
