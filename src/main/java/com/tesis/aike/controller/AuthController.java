@@ -59,4 +59,15 @@ public class AuthController {
             return ResponseEntity.status(401).body("Token inválido o expirado");
         }
     }
+
+    @PostMapping("/login-google")
+    public ResponseEntity<?> loginGoogle(@RequestBody Map<String, String> body) {
+        try {
+            String idToken = body.get("idToken");
+            return ResponseEntity.ok(authService.loginGoogle(idToken));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Token de Google inválido");
+        }
+    }
+
 }
