@@ -21,14 +21,7 @@ public class MercadoPagoConfiguration {
 
     @PostConstruct
     public void init() {
-        try {
-            System.out.println(">>> MercadoPago init...");
-            System.out.println(">>> accessToken: " + accessToken);
-            MercadoPagoConfig.setAccessToken(accessToken);
-            System.out.println(">>> MercadoPago OK");
-        } catch (Exception e) {
-            System.err.println(">>> Error en MercadoPago init: " + e.getMessage());
-        }
+        System.out.println(">>> MercadoPago init (SKIP CONFIG)");
     }
 
     @Bean(name = "webHookSecret")
