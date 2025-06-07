@@ -12,15 +12,4 @@ public class AikeApplication {
     public static void main(String[] args) {
         SpringApplication.run(AikeApplication.class, args);
     }
-
-
-    @Bean
-    public CommandLineRunner runner(ChatClient.Builder builder) {
-        return args -> {
-            ChatClient chatClient = builder.build();
-            String response = chatClient.prompt("Tell me a joke").call().content();
-            System.out.println(response);
-        };
-    }
-
 }
