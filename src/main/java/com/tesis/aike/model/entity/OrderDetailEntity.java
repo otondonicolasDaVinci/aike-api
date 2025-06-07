@@ -30,9 +30,10 @@ public class OrderDetailEntity {
     @Column(nullable = false)
     private Double unitPrice; // Precio al momento de la compra
 
-    public void setOrder(OrderEntity orderEntity) {
-
+    public void setOrder(OrderEntity order) {
+        this.order = order;
     }
+
 
     // Getters y Setters (Lombok @Data los genera)
 }
