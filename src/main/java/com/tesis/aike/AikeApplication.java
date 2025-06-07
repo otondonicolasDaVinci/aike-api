@@ -16,8 +16,10 @@ public class AikeApplication {
     @Bean
     public CommandLineRunner runner() {
         return args -> {
-            System.out.println(">>> Aike está levantado.");
+            System.out.println(">>> Aike arrancó OK.");
+            System.out.println(">>> Puerto: " + System.getenv("PORT"));
         };
     }
+
 
 }
