@@ -18,7 +18,9 @@ public class MercadoPagoConfiguration {
 
     @PostConstruct
     public void init() {
+        System.out.println(">>> [MercadoPago] Init con accessToken: " + accessToken);
         MercadoPagoConfig.setAccessToken(accessToken);
+        System.out.println(">>> [MercadoPago] AccessToken seteado");
     }
     @Bean(name = "webHookSecret")
     public String getWebHookSecret() {
