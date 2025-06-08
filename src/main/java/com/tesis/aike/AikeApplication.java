@@ -14,12 +14,13 @@ public class AikeApplication {
 
     }
     @Bean
-    public CommandLineRunner runner() {
+    public CommandLineRunner keepAliveRunner() {
         return args -> {
-            System.out.println(">>> Aike arrancó OK.");
-            System.out.println(">>> Puerto: " + System.getenv("PORT"));
+            System.out.println(">> Aike está corriendo...");
+            Thread.currentThread().join();
         };
     }
+
 
 
 }
