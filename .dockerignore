@@ -1,0 +1,13 @@
+target/*.jar.original
+target/generated-sources/
+target/maven-status/
+target/classes/
+target/surefire-reports/
+target/test-classes/
+
+**/.idea/
+**/.vscode/
+**/*.iml
+**/.DS_Store
+**/node_modules/
+**/dist/
