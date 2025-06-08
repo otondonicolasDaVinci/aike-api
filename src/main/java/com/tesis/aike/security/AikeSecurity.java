@@ -19,9 +19,8 @@ public class AikeSecurity {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST,
-                                "/users",
-                                "/users/refresh").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users/refresh").permitAll()
                         .requestMatchers("/api/payments/webhook").permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
