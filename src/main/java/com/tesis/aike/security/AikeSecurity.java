@@ -30,6 +30,7 @@ public class AikeSecurity {
                                 "/api/payments/pending",
                                 "/api/qrcode/**"
                         ).permitAll()
+                        .requestMatchers("/").permitAll()
                         .requestMatchers("/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/reservations").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/cabins").permitAll()
