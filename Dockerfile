@@ -1,14 +1,12 @@
-# Usa Java 17 JDK (Temurin = OpenJDK oficial)
-FROM eclipse-temurin:17-jdk
-
-# Directorio de trabajo en el contenedor
+# Etapa 1: Build de Maven
+FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
+COPY . .
+RUN ./mvnw clean package -DskipTests
 
-# Copia el JAR generado por Maven al contenedor
-COPY target/aike-1.1.3.jar app.jar
-
-# Expone el puerto por defecto de Spring Boot
+# Etapa 2: Imagen final liviana
+FROM eclipse-temurin:17-jdk
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-
-# Comando para correr tu aplicación
 ENTRYPOINT ["java", "-jar", "app.jar"]
