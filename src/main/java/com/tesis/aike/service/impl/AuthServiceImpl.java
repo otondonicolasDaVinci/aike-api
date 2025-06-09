@@ -1,7 +1,6 @@
 package com.tesis.aike.service.impl;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.tesis.aike.helper.ConstantValues;
 import com.tesis.aike.helper.mapper.UserMapper;
 import com.tesis.aike.model.dto.UserDTO;
 import com.tesis.aike.model.dto.RoleDTO;
@@ -12,16 +11,20 @@ import com.tesis.aike.repository.UsersRepository;
 import com.tesis.aike.security.JwtTokenUtil;
 import com.tesis.aike.service.AuthService;
 import com.tesis.aike.service.GoogleTokenVerifierService;
-import com.tesis.aike.utils.PasswordEncryptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 
 @Service
 public class AuthServiceImpl implements AuthService {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     private final UsersRepository usersRepo;
     private final RolesRepository rolesRepo;
@@ -30,11 +33,13 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
 
     @Autowired
-    public AuthServiceImpl(UsersRepository usersRepo,
-                           RolesRepository rolesRepo,
-                           JwtTokenUtil jwt,
-                           GoogleTokenVerifierService googleTokenVerifierService,
-                           UserMapper userMapper) {
+    public AuthServiceImpl(
+            UsersRepository usersRepo,
+            RolesRepository rolesRepo,
+            JwtTokenUtil jwt,
+            GoogleTokenVerifierService googleTokenVerifierService,
+            UserMapper userMapper
+    ) {
         this.usersRepo = usersRepo;
         this.rolesRepo = rolesRepo;
         this.jwt = jwt;
@@ -43,49 +48,78 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String login(String user, String rawPassword) {
-        UsersEntity userFound = usersRepo.findByName(user)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, ConstantValues.Security.LOGIN_FAILED));
-
-        if (!userFound.getPassword().equals(PasswordEncryptor.encryptPassword(rawPassword))) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, ConstantValues.Security.LOGIN_FAILED);
-        }
-
-        RolesEntity role = rolesRepo.findById(userFound.getRoleId()).orElse(null);
-        String roleNameDb = role == null ? "CLIENT" : role.getName().toUpperCase();
-        String roleName = roleNameDb.startsWith("ADMIN") ? "ADMIN" : "CLIENT";
-
-        return jwt.generate(userFound.getId(), roleName);
+    public String login(String userId, String rawPassword) {
+        return "";
     }
 
     @Override
+    @Transactional
     public Map<String, Object> loginGoogle(String idToken) {
-        GoogleIdToken.Payload payload = googleTokenVerifierService.verify(idToken);
-        if (payload == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "ID token inválido");
+        log.info("Iniciando proceso de login con Google.");
+
+        GoogleIdToken.Payload payload;
+        try {
+            payload = googleTokenVerifierService.verify(idToken);
+            if (payload == null) {
+                log.error("La verificación del token de Google ha fallado. El token es inválido o ha expirado.");
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "ID token inválido");
+            }
+        } catch (Exception e) {
+            log.error("Ocurrió una excepción durante la verificación del token de Google.", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al verificar el token de Google.");
+        }
 
         String email = payload.getEmail();
         String name = (String) payload.get("name");
+        log.info("Token de Google verificado exitosamente para el email: {}", email);
 
         UsersEntity user = usersRepo.findByEmail(email).orElseGet(() -> {
-            RolesEntity role = rolesRepo.findByNameIgnoreCase("CLIENT")
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Rol CLIENT no encontrado"));
+            log.info("Usuario con email {} no encontrado. Creando nuevo usuario.", email);
+            try {
+                RolesEntity role = rolesRepo.findByNameIgnoreCase("CLIENT")
+                        .orElseThrow(() -> {
+                            log.error("Error crítico: El rol 'CLIENT' no se encuentra en la base de datos.");
+                            return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Rol CLIENT no encontrado");
+                        });
 
-            UserDTO dto = new UserDTO();
-            dto.setEmail(email);
-            dto.setName(name);
-            dto.setPassword("from-google");
-            dto.setRole(new RoleDTO(role.getId(), role.getName()));
+                log.info("Rol 'CLIENT' encontrado con ID: {}. Procediendo a crear el DTO y la entidad.", role.getId());
 
-            return usersRepo.save(userMapper.toEntity(dto));
+                UserDTO dto = new UserDTO();
+                dto.setEmail(email);
+                dto.setName(name);
+                dto.setPassword("from-google");
+                dto.setDni("DNI Pendiente");
+                dto.setRole(new RoleDTO(role.getId(), role.getName()));
+
+                UsersEntity newUserEntity = userMapper.toEntity(dto);
+                log.info("Mapeo a entidad completado. Guardando nuevo usuario...");
+
+                return usersRepo.save(newUserEntity);
+
+            } catch (Exception e) {
+                log.error("Ocurrió una excepción al intentar crear un nuevo usuario para el email: {}", email, e);
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "No se pudo crear el nuevo usuario.");
+            }
         });
 
-        RolesEntity role = rolesRepo.findById(user.getRoleId()).orElse(null);
-        String roleNameDb = role == null ? "CLIENT" : role.getName().toUpperCase();
-        String roleName = roleNameDb.startsWith("ADMIN") ? "ADMIN" : "CLIENT";
+        log.info("Usuario obtenido (existente o recién creado) con ID: {}", user.getId());
 
-        String jwtToken = jwt.generate(user.getId(), roleName);
+        try {
+            RolesEntity role = rolesRepo.findById(user.getRoleId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "El rol del usuario no se encontró en la BD"));
 
-        return Map.of("token", jwtToken, "userId", user.getId(), "email", user.getEmail());
+            String roleNameDb = role.getName().toUpperCase();
+            String finalRole = roleNameDb.startsWith("ADMIN") ? "ADMIN" : "CLIENT";
+            log.info("Generando token JWT para userId: {} con rol: {}", user.getId(), finalRole);
+
+            String jwtToken = jwt.generate(user.getId(), finalRole);
+            log.info("Login con Google completado exitosamente para el usuario: {}", email);
+
+            return Map.of("token", jwtToken, "userId", user.getId(), "email", user.getEmail());
+
+        } catch (Exception e) {
+            log.error("Ocurrió una excepción al generar el token JWT para el usuario: {}", user.getId(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "No se pudo generar el token de sesión.");
+        }
     }
 }

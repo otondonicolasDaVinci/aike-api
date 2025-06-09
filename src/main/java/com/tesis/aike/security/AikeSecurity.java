@@ -18,21 +18,31 @@ public class AikeSecurity {
 
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users/refresh").permitAll()
+                        .requestMatchers(
+                                "/auth/login",
+                                "/auth/login-google"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.POST,
+                                "/users",
+                                "/users/refresh").permitAll()
                         .requestMatchers("/api/payments/webhook").permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/payments/success",
                                 "/api/payments/failure",
                                 "/api/payments/pending",
-                                "/api/qrcode/**"
+                                "/api/qrcode/**",
+                                "/cabins"
                         ).permitAll()
-                        .requestMatchers("/").permitAll()
+
+                        // Nuevas reglas para /users
+                        .requestMatchers(HttpMethod.GET, "/users/{id}").hasAnyRole("CLIENT", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/users/{id}").hasAnyRole("CLIENT", "ADMIN")
                         .requestMatchers("/users/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/reservations/user/{userId}").hasAnyRole("CLIENT", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/reservations").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/cabins").permitAll()
+
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenUtil),
                         UsernamePasswordAuthenticationFilter.class);

@@ -11,7 +11,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/aike/ia/text")
-public class AikeIAController {
+public class    AikeIAController {
 
     private final AikeAIServiceImpl chatGptService;
 
