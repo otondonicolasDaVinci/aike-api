@@ -1,6 +1,7 @@
 package com.tesis.aike.service.impl;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.tesis.aike.helper.ConstantValues;
 import com.tesis.aike.helper.mapper.UserMapper;
 import com.tesis.aike.model.dto.UserDTO;
 import com.tesis.aike.model.dto.RoleDTO;
@@ -11,6 +12,7 @@ import com.tesis.aike.repository.UsersRepository;
 import com.tesis.aike.security.JwtTokenUtil;
 import com.tesis.aike.service.AuthService;
 import com.tesis.aike.service.GoogleTokenVerifierService;
+import com.tesis.aike.utils.PasswordEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +50,20 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String login(String userId, String rawPassword) {
-        return "";
+    public String login(String user, String rawPassword) {
+        UsersEntity userFound = usersRepo.findByName(user)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, ConstantValues.Security.LOGIN_FAILED));
+
+        if (!userFound.getPassword().equals(PasswordEncryptor.encryptPassword(rawPassword))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, ConstantValues.Security.LOGIN_FAILED);
+        }
+
+        RolesEntity role = rolesRepo.findById(userFound.getRoleId()).orElse(null);
+        String roleNameDb = role == null ? "CLIENT" : role.getName().toUpperCase();
+        String roleName = roleNameDb.startsWith("ADMIN") ? "ADMIN" : "CLIENT";
+
+        return jwt.generate(userFound.getId(), roleName);
     }
 
     @Override
