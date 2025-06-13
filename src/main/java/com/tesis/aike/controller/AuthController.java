@@ -1,6 +1,6 @@
 package com.tesis.aike.controller;
 
-import com.tesis.aike.helper.ConstantValues;
+import com.tesis.aike.model.dto.AuthRequest;
 import com.tesis.aike.security.JwtTokenUtil;
 import com.tesis.aike.service.AuthService;
 import com.tesis.aike.service.ReservationService;
@@ -8,6 +8,7 @@ import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 
@@ -29,19 +30,19 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         try {
-            String user = body.get("user") != null ? body.get("user") : null;
-            String pwd = body.get("password");
-            String token = authService.login(user, pwd);
-            return ResponseEntity.ok(Map.of("token", token));
+            Map<String, Object> responseMap = authService.login(request.getUser(), request.getPassword());
+            return ResponseEntity.ok(responseMap);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(Map.of("error", e.getReason()));
         } catch (Exception e) {
-            return ResponseEntity.status(401).body(ConstantValues.Security.LOGIN_FAILED);
+            return ResponseEntity.status(500).body(Map.of("error", "Error interno del servidor"));
         }
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<String> refreshToken(@RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String bearerToken) {
         try {
             String token = bearerToken.replace("Bearer ", "");
             Claims claims = jwtTokenUtil.parse(token);
@@ -53,7 +54,7 @@ public class AuthController {
 
             String role = claims.get("role", String.class);
             String newToken = jwtTokenUtil.generate(userId, role);
-            return ResponseEntity.ok(newToken);
+            return ResponseEntity.ok(Map.of("token", newToken));
 
         } catch (Exception e) {
             return ResponseEntity.status(401).body("Token inválido o expirado");
@@ -66,8 +67,7 @@ public class AuthController {
             String idToken = body.get("idToken");
             return ResponseEntity.ok(authService.loginGoogle(idToken));
         } catch (Exception e) {
-            return ResponseEntity.status(401).body("Token de Google inválido");
+            return ResponseEntity.status(401).body(Map.of("error", "Token de Google inválido"));
         }
     }
-
 }
