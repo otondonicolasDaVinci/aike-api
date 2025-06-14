@@ -34,6 +34,7 @@ public class AikeSecurity {
                                 "/api/qrcode/**",
                                 "/cabins"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/access/check").permitAll()
 
                         // Nuevas reglas para /users
                         .requestMatchers(HttpMethod.GET, "/users/{id}").hasAnyRole("CLIENT", "ADMIN")
