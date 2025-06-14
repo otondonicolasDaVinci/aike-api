@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 public class MercadoPagoConfiguration {
 
     public MercadoPagoConfiguration() {
-        System.out.println(">>> Constructor de MercadoPagoConfiguration");
     }
 
     @Value("${mercadopago.access-token}")
@@ -21,7 +20,7 @@ public class MercadoPagoConfiguration {
 
     @PostConstruct
     public void init() {
-        System.out.println(">>> MercadoPago init (SKIP CONFIG)");
+        MercadoPagoConfig.setAccessToken(accessToken);
     }
 
     @Bean(name = "webHookSecret")
