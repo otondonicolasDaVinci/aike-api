@@ -8,7 +8,7 @@ import com.tesis.aike.model.entity.UsersEntity;
 import com.tesis.aike.repository.RolesRepository;
 import com.tesis.aike.repository.UsersRepository;
 import com.tesis.aike.service.UserService;
-import com.tesis.aike.utils.PasswordEncryptor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,14 +23,17 @@ public class UserServiceImpl implements UserService {
     private final UsersRepository usersRepo;
     private final RolesRepository rolesRepo;
     private final UserMapper mapper;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
     public UserServiceImpl(UsersRepository usersRepo,
                            RolesRepository rolesRepo,
-                           UserMapper mapper) {
+                           UserMapper mapper,
+                           BCryptPasswordEncoder passwordEncoder) {
         this.usersRepo = usersRepo;
         this.rolesRepo = rolesRepo;
         this.mapper = mapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     private UserDTO toDTOWithRoleName(UsersEntity entity) {
@@ -45,7 +48,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserDTO create(UserDTO in) {
-        in.setPassword(PasswordEncryptor.encryptPassword(in.getPassword()));
+        in.setPassword(passwordEncoder.encode(in.getPassword()));
         UsersEntity saved = usersRepo.save(mapper.toEntity(in));
         return toDTOWithRoleName(saved);
     }
@@ -58,7 +61,7 @@ public class UserServiceImpl implements UserService {
         e.setDni(in.getDni());
         e.setRoleId(in.getRole().getId());
         if (in.getPassword() != null && !in.getPassword().isBlank())
-            e.setPassword(PasswordEncryptor.encryptPassword(in.getPassword()));
+            e.setPassword(passwordEncoder.encode(in.getPassword()));
         return toDTOWithRoleName(e);
     }
 
