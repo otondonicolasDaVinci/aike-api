@@ -46,7 +46,7 @@ public class PaymentServiceImpl implements PaymentService {
                             .build())
                     .autoReturn("approved")
                     .externalReference(req.getReservationId().toString())
-                    .notificationUrl("https://f847-201-216-219-13.ngrok-free.app/api/payments/webhook") // 👈 IMPORTANTE
+                    .notificationUrl("https://f847-201-216-219-13.ngrok-free.app/api/payments/webhook")
                     .build();
 
             Preference preference = new PreferenceClient().create(preferenceRequest);
