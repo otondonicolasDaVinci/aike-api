@@ -53,6 +53,13 @@ public class ReservationServiceImpl implements ReservationService {
 
 
     public ReservationDTO create(ReservationDTO dto) {
+        if (dto.getCabin() == null || dto.getCabin().getId() == null ||
+                dto.getUser() == null || dto.getUser().getId() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    ConstantValues.ReservationService.INVALID_DATA);
+        }
+
         validateAvailability(dto.getCabin().getId(), dto.getStartDate(), dto.getEndDate());
         ReservationsEntity saved = reservationsRepository.save(mapper.toEntity(dto));
         return toDTOFull(saved);
