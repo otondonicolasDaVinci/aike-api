@@ -8,8 +8,10 @@ import com.mercadopago.resources.payment.Payment;
 import com.mercadopago.resources.preference.Preference;
 import com.tesis.aike.model.dto.PaymentRequestMercadoPagoDTO;
 import com.tesis.aike.model.dto.PaymentResponseMercadoPagoDTO;
+import com.tesis.aike.model.entity.UsersEntity;
 import com.tesis.aike.service.PaymentService;
 import com.tesis.aike.service.ReservationService;
+import com.tesis.aike.repository.UsersRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,9 +21,12 @@ import java.util.List;
 public class PaymentServiceImpl implements PaymentService {
 
     private final ReservationService reservationService;
+    private final UsersRepository usersRepository;
 
-    public PaymentServiceImpl(ReservationService reservationService) {
+    public PaymentServiceImpl(ReservationService reservationService,
+                              UsersRepository usersRepository) {
         this.reservationService = reservationService;
+        this.usersRepository = usersRepository;
         MercadoPagoConfig.setAccessToken(System.getenv("MP_ACCESS_TOKEN"));
     }
 
@@ -34,10 +39,21 @@ public class PaymentServiceImpl implements PaymentService {
                     .unitPrice(BigDecimal.valueOf(req.getAmount()))
                     .build();
 
+            String email = req.getPayerEmail();
+            if (email == null || email.isBlank()) {
+                var reservation = reservationService.findById(req.getReservationId().longValue());
+                if (reservation != null && reservation.getUser() != null) {
+                    Long uid = reservation.getUser().getId();
+                    email = usersRepository.findById(uid.intValue())
+                            .map(UsersEntity::getEmail)
+                            .orElse(null);
+                }
+            }
+
             PreferenceRequest preferenceRequest = PreferenceRequest.builder()
                     .items(List.of(item))
                     .payer(PreferencePayerRequest.builder()
-                            .email("test_user_1060862931@testuser.com")
+                            .email(email)
                             .build())
                     .backUrls(PreferenceBackUrlsRequest.builder()
                             .success("https://f847-201-216-219-13.ngrok-free.app/api/payments/success")
