@@ -32,7 +32,6 @@ public class PaymentController {
     @PostMapping("/webhook")
     public ResponseEntity<Void> handleWebhook(@RequestBody String rawBody) {
         try {
-            System.out.println("Webhook recibido con body: " + rawBody);
             Map<?, ?> body = new ObjectMapper().readValue(rawBody, Map.class);
             Long paymentId = Long.valueOf(((Map<?, ?>) body.get("data")).get("id").toString());
             paymentService.processWebhook(paymentId);
