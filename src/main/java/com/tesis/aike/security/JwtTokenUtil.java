@@ -28,10 +28,9 @@ public class JwtTokenUtil {
     public String generate(Long userId, String role) {
         Instant now = Instant.now();
         return Jwts.builder()
-                .setSubject(userId.toString())
-                .claim("role", role)
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(now.plus(2, ChronoUnit.MINUTES)))
+                .claim("s", userId.toString())
+                .claim("r", role)
+                .setExpiration(Date.from(now.plus(10, ChronoUnit.MINUTES)))
                 .signWith(key)
                 .compact();
     }
