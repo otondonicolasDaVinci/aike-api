@@ -47,12 +47,12 @@ public class AuthController {
             String token = bearerToken.replace("Bearer ", "");
             Claims claims = jwtTokenUtil.parse(token);
 
-            Long userId = Long.valueOf(claims.getSubject());
+            Long userId = Long.valueOf(claims.get("s", String.class));
             if (!reservationService.hasActiveReservation(userId)) {
                 return ResponseEntity.status(403).body("El usuario no tiene una reserva activa");
             }
 
-            String role = claims.get("role", String.class);
+            String role = claims.get("r", String.class);
             String newToken = jwtTokenUtil.generate(userId, role);
             return ResponseEntity.ok(Map.of("token", newToken));
 
@@ -69,5 +69,4 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(401).body(Map.of("error", "Token de Google inválido"));
         }
-    }
-}
+    }}

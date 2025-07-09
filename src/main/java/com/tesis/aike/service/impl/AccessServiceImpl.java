@@ -21,7 +21,7 @@ public class AccessServiceImpl implements AccessService {
     public boolean verifyAccessToken(String token) {
         try {
             Claims claims = jwtTokenUtil.parse(token);
-            Long userId = Long.valueOf(claims.getSubject());
+            Long userId = Long.valueOf(claims.get("s", String.class));
 
             return reservationService.hasActiveReservation(userId);
 

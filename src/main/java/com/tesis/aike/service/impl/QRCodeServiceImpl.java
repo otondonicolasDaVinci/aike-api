@@ -47,8 +47,8 @@ public class QRCodeServiceImpl implements QRCodeService {
         try {
             Instant now = Instant.now();
             String jwt = Jwts.builder()
-                    .setSubject(userId.toString())
-                    .claim("role", "CLIENT")
+                    .claim("s", userId.toString())
+                    .claim("r", "CLIENT")
                     .setIssuedAt(Date.from(now))
                     .setExpiration(Date.from(now.plus(5, ChronoUnit.SECONDS)))
                     .signWith(jwtTokenUtil.getKey())
