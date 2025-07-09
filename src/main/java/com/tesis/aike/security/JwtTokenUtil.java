@@ -30,7 +30,6 @@ public class JwtTokenUtil {
         return Jwts.builder()
                 .claim("s", userId.toString())
                 .claim("r", role)
-                .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(now.plus(10, ChronoUnit.MINUTES)))
                 .signWith(key)
                 .compact();
