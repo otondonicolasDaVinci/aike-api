@@ -145,7 +145,7 @@ public class AikeAIServiceImpl implements AikeAIService {
         try {
             if (p instanceof User u) return Long.parseLong(u.getUsername());
             if (p instanceof org.springframework.security.oauth2.core.user.OAuth2User o) {
-                String id = o.getAttribute("sub");
+                String id = o.getAttribute("s");
                 return id == null ? null : Long.parseLong(id);
             }
             if (p instanceof String s) return Long.parseLong(s);
