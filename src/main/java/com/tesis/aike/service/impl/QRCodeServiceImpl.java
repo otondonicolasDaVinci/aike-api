@@ -52,7 +52,7 @@ public class QRCodeServiceImpl implements QRCodeService {
             String jwt = Jwts.builder()
                     .claim("s", userId.toString())
                     .claim("r", "CLIENT")
-                    .setExpiration(Date.from(now.plus(5, ChronoUnit.SECONDS)))
+                    .setExpiration(Date.from(now.plus(10, ChronoUnit.MINUTES)))
                     .signWith(jwtTokenUtil.getKey())
                     .compact();
 
