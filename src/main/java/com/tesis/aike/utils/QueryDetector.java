@@ -24,6 +24,18 @@ public class QueryDetector {
                 && !containsAny(message, ConstantValues.QueryKeywords.RESERVATION_OWNERSHIP);
     }
 
+    public static boolean isProductsQuery(String message) {
+        return containsAny(message, ConstantValues.QueryKeywords.PRODUCTS);
+    }
+
+    public static boolean isMyCabinQuery(String message) {
+        return containsAny(message, ConstantValues.QueryKeywords.MY_CABIN);
+    }
+
+    public static boolean isTourQuery(String message) {
+        return containsAny(message, ConstantValues.QueryKeywords.TOURS);
+    }
+
     private static boolean containsAny(String text, String[] keywords) {
         if (text == null) return false;
         String lower = text.toLowerCase();

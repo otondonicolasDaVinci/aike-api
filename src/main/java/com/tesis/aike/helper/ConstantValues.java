@@ -27,6 +27,24 @@ public class ConstantValues {
                 Instrucción: Responde amablemente que tu función es ayudar con información sobre las "Cabañas Aike", como la disponibilidad y gestión de reservas.
                 No intentes responder la pregunta original del usuario. Guíalo de vuelta a los temas relevantes.
                 """;
+
+        // Información de productos
+        public static final String PRODUCTS_TEMPLATE = "Estos son los productos disponibles en la tienda:\n%s";
+        public static final String CONTEXT_PRODUCTS_PROMPT = "Contexto sobre los productos disponibles:\n%s\n\nPregunta del usuario: \"%s\"\n\nInstrucción: Responde utilizando únicamente la información del contexto.";
+        public static final String NO_PRODUCTS = "Actualmente no hay productos disponibles en la tienda.";
+        public static final String ERROR_PRODUCTS = "Lo siento, hubo un problema al obtener los productos.";
+
+        // Información de la cabaña reservada
+        public static final String USER_CABIN_TEMPLATE = "Información de tu cabaña:\nNombre: %s\nCapacidad: %d\nDescripción: %s";
+        public static final String CONTEXT_CABIN_PROMPT = "Contexto de la base de datos sobre la cabaña reservada por el usuario (ID reserva: %d):\n%s\n\nPregunta del usuario: \"%s\"\n\nInstrucción: Responde utilizando sólo la información del contexto.";
+        public static final String USER_NO_RESERVATION = "Según nuestros registros, no tienes una cabaña reservada.";
+        public static final String ERROR_CABIN_INFO = "Lo siento, hubo un problema al consultar la información de tu cabaña.";
+
+        // Información de recorridos turísticos
+        public static final String TOURS_TEMPLATE = "Estos son los recorridos recomendados para la cabaña %s:\n%s";
+        public static final String CONTEXT_TOURS_PROMPT = "Contexto sobre recorridos turísticos:\n%s\n\nPregunta del usuario: \"%s\"\n\nInstrucción: Responde utilizando sólo la información del contexto.";
+        public static final String NO_TOURS = "No hay recorridos turísticos registrados para tu cabaña.";
+        public static final String ERROR_TOURS = "Lo siento, hubo un problema al obtener los recorridos.";
     }
 
     public static class ReservationService {
@@ -53,7 +71,8 @@ public class ConstantValues {
 
         public static final String[] USER_RESERVATIONS = {
                 "mis reservas", "ver mis reservas", "reservas que hice", "mis reservaciones",
-                "estado de mis reservas", "consultar mis reservas", "consultar mis reservaciones"
+                "estado de mis reservas", "consultar mis reservas", "consultar mis reservaciones",
+                "informacion de mi reserva", "detalles de mi reserva"
         };
 
         public static final String[] RESERVATION_OWNERSHIP = {"mias", "mis", "mía", "mi"};
@@ -67,6 +86,12 @@ public class ConstantValues {
         public static final String[] SENSITIVE_DATA = {
                 "dni de", "correo de", "email de", "número de documento de"
         };
+
+        public static final String[] PRODUCTS = {"productos", "tienda", "que venden", "comprar"};
+
+        public static final String[] MY_CABIN = {"mi cabaña", "cabaña que reservé", "información de la cabaña"};
+
+        public static final String[] TOURS = {"recorridos", "tours", "actividades", "atracciones"};
     }
 
     public static class Security {
