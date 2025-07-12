@@ -82,5 +82,7 @@ public class ConstantValues {
         public static final String ERROR_CALL_OPENAI = "Error al llamar a la API OpenAI: {}";
         public static final String ERROR_SYSTEM_OPENAI = "Error al usar rol de sistema con OpenAI: {}";
         public static final String ERROR_AUTH_ID = "No se pudo obtener ID de usuario autenticado: {}";
+        public static final String ERROR_FETCH_PRODUCTS = "Error al obtener información de productos: {}";
+        public static final String ERROR_FETCH_TOURS = "Error al obtener información de tours: {}";
     }
 }
