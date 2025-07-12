@@ -59,3 +59,17 @@ src/
 │       ├── application.properties  # Configuración de Spring Boot
 │       └── schema.sql              # Script de inicialización de la base de datos
 └── test/                           # Pruebas unitarias e integración
+
+### Endpoint de Chat IA
+
+El endpoint `/v1/aike/ia/text/prompt` responde con un objeto JSON estructurado:
+
+```json
+{
+  "respuesta": "<texto>",
+  "lines": ["<línea>", "..."]
+}
+```
+
+`respuesta` contiene el texto plano generado por la IA y `lines` incluye cada
+línea del mensaje para facilitar su presentación.
