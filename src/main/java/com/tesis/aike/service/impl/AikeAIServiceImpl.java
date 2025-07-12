@@ -6,6 +6,8 @@ import com.tesis.aike.model.dto.ReservationDTO;
 import com.tesis.aike.service.AikeAIService;
 import com.tesis.aike.service.CabinService;
 import com.tesis.aike.service.ReservationService;
+import com.tesis.aike.service.ProductService;
+import com.tesis.aike.service.TourService;
 import com.tesis.aike.utils.QueryDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,8 @@ public class AikeAIServiceImpl implements AikeAIService {
     private final ChatClient chat;
     private final CabinService cabinSvc;
     private final ReservationService resSvc;
+    private final ProductService productSvc;
+    private final TourService tourSvc;
 
     // <-- MODIFICACIÓN 1: Se añade la instrucción de sistema como una constante.
     private static final String SYSTEM_INSTRUCTION = """
@@ -42,13 +46,17 @@ public class AikeAIServiceImpl implements AikeAIService {
     @Autowired
     public AikeAIServiceImpl(ChatClient.Builder builder,
                              CabinService cabinSvc,
-                             ReservationService resSvc) {
+                             ReservationService resSvc,
+                             ProductService productSvc,
+                             TourService tourSvc) {
         // <-- MODIFICACIÓN 2: Se configura el cliente de chat con el prompt de sistema por defecto.
         this.chat = builder
                 .defaultSystem(SYSTEM_INSTRUCTION)
                 .build();
         this.cabinSvc = cabinSvc;
         this.resSvc = resSvc;
+        this.productSvc = productSvc;
+        this.tourSvc = tourSvc;
     }
 
     public String promptResponse(String msg) {
@@ -64,6 +72,9 @@ public class AikeAIServiceImpl implements AikeAIService {
         boolean askCabins = QueryDetector.isAvailableCabinsQuery(msg);
         boolean askOwnRes = QueryDetector.isReservationQuery(msg);
         boolean askAllRes = QueryDetector.isAllReservationsQuery(msg);
+        boolean askProducts = QueryDetector.isProductsQuery(msg);
+        boolean askMyCabin = QueryDetector.isMyCabinQuery(msg);
+        boolean askTours = QueryDetector.isTourQuery(msg);
 
         String prompt;
 
@@ -106,6 +117,63 @@ public class AikeAIServiceImpl implements AikeAIService {
             } catch (Exception e) {
                 logger.error(ConstantValues.LoggerMessages.ERROR_FETCH_RESERVATIONS, e.getMessage(), e);
                 return ConstantValues.AikeAIService.ERROR_RESERVATIONS;
+            }
+        } else if (askMyCabin) {
+            try {
+                if (uid == null) {
+                    prompt = String.format(ConstantValues.AikeAIService.USER_NOT_IDENTIFIED_TEMPLATE, msg);
+                } else {
+                    List<ReservationDTO> list = resSvc.findByUserId(uid);
+                    if (list.isEmpty()) {
+                        prompt = ConstantValues.AikeAIService.USER_NO_RESERVATION;
+                    } else {
+                        ReservationDTO res = list.get(0);
+                        CabinDTO cab = cabinSvc.findById(res.getCabin().getId().intValue());
+                        String info = String.format(ConstantValues.AikeAIService.USER_CABIN_TEMPLATE,
+                                cab.getName(), cab.getCapacity(), cab.getDescription());
+                        prompt = String.format(ConstantValues.AikeAIService.CONTEXT_CABIN_PROMPT,
+                                res.getId(), info, msg);
+                    }
+                }
+            } catch (Exception e) {
+                logger.error(ConstantValues.LoggerMessages.ERROR_FETCH_RESERVATIONS, e.getMessage(), e);
+                return ConstantValues.AikeAIService.ERROR_CABIN_INFO;
+            }
+        } else if (askTours) {
+            try {
+                if (uid == null) {
+                    prompt = String.format(ConstantValues.AikeAIService.USER_NOT_IDENTIFIED_TEMPLATE, msg);
+                } else {
+                    List<ReservationDTO> list = resSvc.findByUserId(uid);
+                    if (list.isEmpty()) {
+                        prompt = ConstantValues.AikeAIService.USER_NO_RESERVATION;
+                    } else {
+                        ReservationDTO res = list.get(0);
+                        CabinDTO cab = cabinSvc.findById(res.getCabin().getId().intValue());
+                        List<String> tours = tourSvc.getToursForCabin(cab.getName());
+                        String tourLines = tours.stream().map(t -> "- " + t).collect(Collectors.joining("\n"));
+                        String info = tours.isEmpty() ? ConstantValues.AikeAIService.NO_TOURS
+                                : String.format(ConstantValues.AikeAIService.TOURS_TEMPLATE, cab.getName(), tourLines);
+                        prompt = String.format(ConstantValues.AikeAIService.CONTEXT_TOURS_PROMPT, info, msg);
+                    }
+                }
+            } catch (Exception e) {
+                logger.error(ConstantValues.LoggerMessages.ERROR_FETCH_RESERVATIONS, e.getMessage(), e);
+                return ConstantValues.AikeAIService.ERROR_TOURS;
+            }
+        } else if (askProducts) {
+            try {
+                var products = productSvc.findAllProducts();
+                String lines = products.stream()
+                        .map(p -> String.format("- %s (Categoría: %s, Precio: %.2f)",
+                                p.getTitle(), p.getCategory(), p.getPrice()))
+                        .collect(Collectors.joining("\n"));
+                String info = products.isEmpty() ? ConstantValues.AikeAIService.NO_PRODUCTS
+                        : String.format(ConstantValues.AikeAIService.PRODUCTS_TEMPLATE, lines);
+                prompt = String.format(ConstantValues.AikeAIService.CONTEXT_PRODUCTS_PROMPT, info, msg);
+            } catch (Exception e) {
+                logger.error(ConstantValues.LoggerMessages.ERROR_FETCH_CABINS, e.getMessage(), e);
+                return ConstantValues.AikeAIService.ERROR_PRODUCTS;
             }
         } else {
             prompt = String.format(ConstantValues.AikeAIService.FALLBACK_GUIDANCE_PROMPT, msg);
