@@ -110,6 +110,7 @@ public class ReservationServiceImpl implements ReservationService {
             CabinDTO cabin = new CabinDTO();
             cabin.setId(c.getId());
             cabin.setName(c.getName());
+            cabin.setImageUrl(c.getImageUrl());
             dto.setCabin(cabin);
         });
 
