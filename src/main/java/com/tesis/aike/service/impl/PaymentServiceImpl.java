@@ -56,13 +56,13 @@ public class PaymentServiceImpl implements PaymentService {
                             .email(email)
                             .build())
                     .backUrls(PreferenceBackUrlsRequest.builder()
-                            .success("https://f847-201-216-219-13.ngrok-free.app/api/payments/success")
-                            .failure("https://f847-201-216-219-13.ngrok-free.app/api/payments/failure")
-                            .pending("https://f847-201-216-219-13.ngrok-free.app/api/payments/pending")
+                            .success("https://ymucpmxkp3.us-east-1.awsapprunner.com/api/payments/success")
+                            .failure("https://ymucpmxkp3.us-east-1.awsapprunner.com/api/payments/failure")
+                            .pending("https://ymucpmxkp3.us-east-1.awsapprunner.com/api/payments/pending")
                             .build())
                     .autoReturn("approved")
                     .externalReference(req.getReservationId().toString())
-                    .notificationUrl("https://f847-201-216-219-13.ngrok-free.app/api/payments/webhook")
+                    .notificationUrl("https://ymucpmxkp3.us-east-1.awsapprunner.com/api/payments/webhook")
                     .build();
 
             Preference preference = new PreferenceClient().create(preferenceRequest);

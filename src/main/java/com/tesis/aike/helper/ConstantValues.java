@@ -70,9 +70,33 @@ public class ConstantValues {
         };
 
         public static final String[] USER_RESERVATIONS = {
-                "mis reservas", "ver mis reservas", "reservas que hice", "mis reservaciones",
-                "estado de mis reservas", "consultar mis reservas", "consultar mis reservaciones",
-                "informacion de mi reserva", "detalles de mi reserva"
+            "mis reservas", "ver mis reservas", "reservas que hice", "mis reservaciones",
+            "estado de mis reservas", "consultar mis reservas", "consultar mis reservaciones",
+            "informacion de mi reserva", "detalles de mi reserva", "mi reserva", "reservas que tengo", "reserva", "consultar mi reserva",
+            "cual es mi reserva", "informacion sobre mi reserva", "ver mi reserva", "ver mis reservaciones",
+            "mis reservas actuales", "mis reservas pasadas", "mis reservas pendientes", "mis reservas confirmadas",
+            "quiero ver mis reservas", "quiero consultar mis reservas", "quiero saber mis reservas",
+            "reservas personales", "reservas propias", "mis reservas de cabañas", "mis reservas en cabañas",
+            "reservas que tengo hechas", "reservas que tengo confirmadas", "reservas que tengo pendientes",
+            "mis reservas activas", "mis reservas canceladas", "mis reservas completadas",
+            "quiero ver las reservas que hice", "quiero ver las reservas que tengo", "quiero ver las reservas que están activas",
+            "quiero ver las reservas que están pendientes", "quiero ver las reservas que están confirmadas",
+            "quiero ver las reservas que están canceladas", "quiero ver las reservas que están completadas",
+            "quiero consultar las reservas que hice", "quiero consultar las reservas que tengo",
+            "quiero consultar las reservas que están activas", "quiero consultar las reservas que están pendientes",
+            "quiero consultar las reservas que están confirmadas", "quiero consultar las reservas que están canceladas",
+            "quiero consultar las reservas que están completadas", "quiero saber las reservas que hice",
+            "quiero saber las reservas que tengo", "quiero saber las reservas que están activas",
+            "quiero saber las reservas que están pendientes", "quiero saber las reservas que están confirmadas",
+            "quiero saber las reservas que están canceladas", "quiero saber las reservas que están completadas",
+            "quiero información sobre mis reservas", "quiero detalles sobre mis reservas",
+            "quiero información sobre las reservas que hice", "quiero información sobre las reservas que tengo",
+            "quiero información sobre las reservas que están activas", "quiero información sobre las reservas que están pendientes",
+            "quiero información sobre las reservas que están confirmadas", "quiero información sobre las reservas que están canceladas",
+            "quiero información sobre las reservas que están completadas", "quiero detalles sobre las reservas que hice",
+            "quiero detalles sobre las reservas que tengo", "quiero detalles sobre las reservas que están activas",
+            "quiero detalles sobre las reservas que están pendientes", "quiero detalles sobre las reservas que están confirmadas",
+            "quiero detalles sobre las reservas que están canceladas", "quiero detalles sobre las reservas que están completadas"
         };
 
         public static final String[] RESERVATION_OWNERSHIP = {"mias", "mis", "mía", "mi"};
