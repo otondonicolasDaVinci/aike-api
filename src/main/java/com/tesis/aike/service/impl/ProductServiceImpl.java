@@ -65,6 +65,7 @@ public class ProductServiceImpl implements ProductService {
         existingProduct.setPrice(productDTO.getPrice());
         existingProduct.setImageUrl(productDTO.getImageUrl());
         existingProduct.setCategory(productDTO.getCategory());
+        existingProduct.setStock(productDTO.getStock());
 
         ProductEntity updatedProduct = productRepository.save(existingProduct);
         return mapToDTO(updatedProduct);
@@ -87,6 +88,7 @@ public class ProductServiceImpl implements ProductService {
         productDTO.setPrice(productEntity.getPrice());
         productDTO.setImageUrl(productEntity.getImageUrl());
         productDTO.setCategory(productEntity.getCategory());
+        productDTO.setStock(productEntity.getStock());
         return productDTO;
     }
 
@@ -99,6 +101,7 @@ public class ProductServiceImpl implements ProductService {
         productEntity.setPrice(productDTO.getPrice());
         productEntity.setImageUrl(productDTO.getImageUrl());
         productEntity.setCategory(productDTO.getCategory());
+        productEntity.setStock(productDTO.getStock());
         return productEntity;
     }
 }
