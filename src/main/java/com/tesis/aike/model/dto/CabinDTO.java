@@ -12,6 +12,7 @@ public class CabinDTO {
     private Integer capacity;
     private String description;
     private Boolean available;
+    private String imageUrl;
 
     public Long getId() {
         return id;
@@ -53,6 +54,14 @@ public class CabinDTO {
         this.available = available;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
     @Override
     public String toString() {
         return "CabinDTO{" +
@@ -61,6 +70,7 @@ public class CabinDTO {
                 ", capacity=" + capacity +
                 ", description='" + description + '\'' +
                 ", available=" + available +
+                ", imageUrl='" + imageUrl + '\'' +
                 '}';
     }
 }

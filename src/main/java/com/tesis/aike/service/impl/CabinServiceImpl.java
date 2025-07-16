@@ -38,6 +38,7 @@ public class CabinServiceImpl implements CabinService {
         entity.setCapacity(dto.getCapacity());
         entity.setDescription(dto.getDescription());
         entity.setAvailable(dto.getAvailable());
+        entity.setImageUrl(dto.getImageUrl());
         CabinEntity updatedEntity = repository.save(entity);
         return mapper.toDTO(updatedEntity);
     }
