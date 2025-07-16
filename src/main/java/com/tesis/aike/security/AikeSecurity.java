@@ -34,6 +34,7 @@ public class AikeSecurity {
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
                         .requestMatchers("/api/payments/webhook").permitAll()
+                        .requestMatchers("/api/product-payments/webhook").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/access/check").permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,

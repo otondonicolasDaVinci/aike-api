@@ -16,23 +16,26 @@ import java.util.List;
 public class ProductEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // O GenerationType.SEQUENCE si prefieres
-    private Long id; // Cambiado a Long para ser consistente con otras IDs
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, length = 255)
     private String title;
 
-    @Column(columnDefinition = "TEXT") // Para descripciones más largas
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)
     private Double price;
 
     @Column(length = 255)
-    private String imageUrl; // URL de la imagen del producto
+    private String imageUrl;
 
     @Column(length = 100)
     private String category;
+
+    @Column(nullable = false)
+    private Integer stock = 0;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = false) // orphanRemoval = false si no quieres borrar el producto al borrar un detalle
     private List<OrderDetailEntity> orderDetails = new ArrayList<>();
@@ -83,6 +86,14 @@ public class ProductEntity {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
     }
 
     public List<OrderDetailEntity> getOrderDetails() {
