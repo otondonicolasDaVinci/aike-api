@@ -16,20 +16,20 @@ import java.util.List;
 public class ProductEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // O GenerationType.SEQUENCE si prefieres
-    private Long id; // Cambiado a Long para ser consistente con otras IDs
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, length = 255)
     private String title;
 
-    @Column(columnDefinition = "TEXT") // Para descripciones más largas
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)
     private Double price;
 
     @Column(length = 255)
-    private String imageUrl; // URL de la imagen del producto
+    private String imageUrl;
 
     @Column(length = 100)
     private String category;

@@ -7,7 +7,7 @@ public class AuthRequest {
     public AuthRequest() {
     }
 
-    // Getters y Setters
+
     public String getUser() {
         return user;
     }
