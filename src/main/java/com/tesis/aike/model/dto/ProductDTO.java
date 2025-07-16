@@ -16,15 +16,17 @@ public class ProductDTO {
     private Double price;
     private String imageUrl;
     private String category;
+    private Integer stock;
 
 
-    public ProductDTO(Long id, String title, String description, Double price, String imageUrl, String category) {
+    public ProductDTO(Long id, String title, String description, Double price, String imageUrl, String category, Integer stock) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.price = price;
         this.imageUrl = imageUrl;
         this.category = category;
+        this.stock = stock;
     }
 
     public ProductDTO() {
@@ -38,6 +40,7 @@ public class ProductDTO {
     public Double getPrice() { return price; }
     public String getImageUrl() { return imageUrl; }
     public String getCategory() { return category; }
+    public Integer getStock() { return stock; }
 
     // Setters
     public void setId(Long id) { this.id = id; }
@@ -46,5 +49,6 @@ public class ProductDTO {
     public void setPrice(Double price) { this.price = price; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public void setCategory(String category) { this.category = category; }
+    public void setStock(Integer stock) { this.stock = stock; }
 
 }

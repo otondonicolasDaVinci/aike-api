@@ -67,7 +67,7 @@ public class ProductPaymentServiceImpl implements ProductPaymentService {
                             .pending("https://ymucpmxkp3.us-east-1.awsapprunner.com/api/payments/pending")
                             .build())
                     .autoReturn("approved")
-                    .externalReference("product-" + product.getId())
+                    .externalReference("product-" + product.getId() + "-" + quantity)
                     .notificationUrl("https://ymucpmxkp3.us-east-1.awsapprunner.com/api/product-payments/webhook")
                     .build();
 
@@ -89,7 +89,33 @@ public class ProductPaymentServiceImpl implements ProductPaymentService {
         try {
             Payment payment = new PaymentClient().get(paymentId);
             if (!"approved".equalsIgnoreCase(payment.getStatus())) return;
-            // Aquí podrías actualizar el estado de la orden o stock
+
+            String reference = payment.getExternalReference();
+            if (reference == null || !reference.startsWith("product-")) return;
+            String[] refParts = reference.replace("product-", "").split("-");
+            Long productId = Long.valueOf(refParts[0]);
+            int quantity = 1;
+            if (refParts.length > 1) {
+                try {
+                    quantity = Integer.parseInt(refParts[1]);
+                } catch (NumberFormatException ignore) {}
+            }
+
+            try {
+                if (payment.getAdditionalInfo() != null &&
+                        payment.getAdditionalInfo().getItems() != null &&
+                        !payment.getAdditionalInfo().getItems().isEmpty() &&
+                        payment.getAdditionalInfo().getItems().get(0).getQuantity() != null) {
+                    quantity = payment.getAdditionalInfo().getItems().get(0).getQuantity();
+                }
+            } catch (Exception ignored) {}
+
+            productRepository.findById(productId).ifPresent(p -> {
+                if (p.getStock() != null) {
+                    p.setStock(Math.max(0, p.getStock() - quantity));
+                    productRepository.save(p);
+                }
+            });
         } catch (MPApiException e) {
             if (e.getApiResponse().getStatusCode() == 404) return;
             throw new RuntimeException("MP error " + e.getApiResponse().getStatusCode(), e);
