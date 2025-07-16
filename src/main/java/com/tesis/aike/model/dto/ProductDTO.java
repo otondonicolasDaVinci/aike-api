@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductDTO {
-    private Long id; // Cambiado a Long
+    private Long id;
     private String title;
     private String description;
     private Double price;
