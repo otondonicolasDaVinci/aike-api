@@ -110,9 +110,11 @@ public class ProductPaymentServiceImpl implements ProductPaymentService {
                 }
             } catch (Exception ignored) {}
 
+            int finalQuantity1 = quantity;
             productRepository.findById(productId).ifPresent(p -> {
+                final int finalQuantity = finalQuantity1; // Declarar una variable final
                 if (p.getStock() != null) {
-                    p.setStock(Math.max(0, p.getStock() - quantity));
+                    p.setStock(Math.max(0, p.getStock() - finalQuantity));
                     productRepository.save(p);
                 }
             });
