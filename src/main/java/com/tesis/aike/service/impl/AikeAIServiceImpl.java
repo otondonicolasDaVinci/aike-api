@@ -196,7 +196,7 @@ public class AikeAIServiceImpl implements AikeAIService {
         String lines = list.stream()
                 .map(r -> String.format(ConstantValues.AikeAIService.RESERVATION_LINE_TEMPLATE,
                         r.getId(), r.getCabin().getName(),
-                        r.getStartDate().format(DATE_TIME_FORMATTER), r.getEndDate().format(DATE_TIME_FORMATTER), r.getStatus()))
+                        r.getStartDate().format(DATE_TIME_FORMATTER), r.getEndDate().format(DATE_TIME_FORMATTER)))
                 .collect(Collectors.joining("\n"));
 
         String info = list.isEmpty()

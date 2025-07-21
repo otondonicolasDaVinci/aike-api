@@ -15,11 +15,11 @@ public class ConstantValues {
         public static final String ERROR_CABINS = "Lo siento, tuve problemas para consultar la disponibilidad actual de las cabañas. Por favor, intenta de nuevo más tarde.";
         public static final String USER_NOT_IDENTIFIED_TEMPLATE = "El usuario preguntó sobre sus reservas, pero no pude identificar quién es el usuario para buscar en la base de datos. Informa amablemente al usuario que necesita iniciar sesión para poder mostrarle sus reservas. Pregunta original del usuario: \"%s\"";
         public static final String NO_RESERVATIONS = "Según nuestros registros, no tienes ninguna reserva realizada.";
-        public static final String USER_RESERVATIONS_TEMPLATE = "Según nuestros registros, estas son tus reservas:\n%s";
-        public static final String CONTEXT_RESERVATIONS_PROMPT = "Contexto de la base de datos sobre las reservas del usuario (ID: %d):\n%s\n\nPregunta del usuario: \"%s\"\n\nInstrucción: Responde a la pregunta del usuario de forma amigable y conversacional, presentando la información del contexto sobre SUS reservas. Usa SÓLO esta información. No inventes reservas ni detalles.";
+        public static final String USER_RESERVATIONS_TEMPLATE = "Según nuestros registros, tienes las siguientes reservas:\n%s";
+        public static final String CONTEXT_RESERVATIONS_PROMPT = "Contexto de la base de datos sobre las reservas del usuario (ID: %d):\n%s\n\nPregunta del usuario: \"%s\"\n\nInstrucción: Responde a la pregunta del usuario de forma amigable y conversacional, presentando la información del contexto sobre SUS reservas. Usa SÓLO esta información y redacta la respuesta como un texto corrido, sin viñetas ni enumeraciones. No inventes reservas ni detalles.";
         public static final String ERROR_RESERVATIONS = "Lo siento, tuve problemas para consultar tus reservas. Por favor, intenta de nuevo más tarde.";
         public static final String ERROR_OPENAI = "Lo siento, hubo un error al procesar tu solicitud con el asistente virtual.";
-        public static final String RESERVATION_LINE_TEMPLATE = "- Reserva número: %d | Cabaña: %s | Desde: %s | Hasta: %s | Estado: %s";
+        public static final String RESERVATION_LINE_TEMPLATE = "Reserva %d: Cabaña %s, desde %s hasta %s.";
         public static final String FALLBACK_GUIDANCE_PROMPT = """
                 El usuario ha hecho una pregunta que no parece estar relacionada con la disponibilidad de cabañas o la consulta de reservas.
                 Pregunta del usuario: "%s"
