@@ -30,8 +30,7 @@ public class    AikeIAController {
 
         String iaResponseText = chatGptService.promptResponse(prompt);
 
-        String[] lines = iaResponseText == null ? new String[0] : iaResponseText.split("\n");
-        ChatApiResponse apiResponse = new ChatApiResponse(iaResponseText, lines);
+        ChatApiResponse apiResponse = new ChatApiResponse(iaResponseText == null ? "" : iaResponseText);
 
         return ResponseEntity.ok(apiResponse);
     }
