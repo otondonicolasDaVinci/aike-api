@@ -1,11 +1,13 @@
 package com.tesis.aike.service.impl;
 
 import com.mercadopago.MercadoPagoConfig;
+import com.mercadopago.client.merchantorder.MerchantOrderClient;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.preference.*;
 import com.mercadopago.exceptions.MPApiException;
+import com.mercadopago.resources.merchantorder.MerchantOrder;
+import com.mercadopago.resources.merchantorder.MerchantOrderItem;
 import com.mercadopago.resources.payment.Payment;
-import com.mercadopago.resources.payment.PaymentItem;
 import com.mercadopago.resources.preference.Preference;
 import com.tesis.aike.model.dto.CartItemRequestDTO;
 import com.tesis.aike.model.dto.CartPaymentRequestDTO;
@@ -15,10 +17,8 @@ import com.tesis.aike.model.entity.UsersEntity;
 import com.tesis.aike.repository.ProductRepository;
 import com.tesis.aike.repository.UsersRepository;
 import com.tesis.aike.service.ProductPaymentService;
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,20 +31,13 @@ public class ProductPaymentServiceImpl implements ProductPaymentService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProductPaymentServiceImpl.class);
 
-    @Value("${mercadopago.access-token}")
-    private String accessToken;
-
     private final ProductRepository productRepository;
     private final UsersRepository usersRepository;
 
     public ProductPaymentServiceImpl(ProductRepository productRepository, UsersRepository usersRepository) {
         this.productRepository = productRepository;
         this.usersRepository = usersRepository;
-    }
-
-    @PostConstruct
-    public void init() {
-        MercadoPagoConfig.setAccessToken(accessToken);
+        MercadoPagoConfig.setAccessToken(System.getenv("MP_ACCESS_TOKEN"));
     }
 
     @Override
@@ -62,16 +55,18 @@ public class ProductPaymentServiceImpl implements ProductPaymentService {
                         .id(product.getId().toString())
                         .title(product.getTitle())
                         .quantity(quantity)
-                        .unitPrice(new BigDecimal(product.getPrice()))
+                        .unitPrice(BigDecimal.valueOf(product.getPrice()))
                         .build();
                 preferenceItems.add(item);
             }
 
             String email = req.getPayerEmail();
-            if ((email == null || email.isBlank()) && req.getUserId() != null) {
-                email = usersRepository.findById(req.getUserId().intValue())
-                        .map(UsersEntity::getEmail)
-                        .orElse(null);
+            if (email == null || email.isBlank()) {
+                if (req.getUserId() != null) {
+                    email = usersRepository.findById(req.getUserId().intValue())
+                            .map(UsersEntity::getEmail)
+                            .orElse(null);
+                }
             }
 
             PreferenceRequest preferenceRequest = PreferenceRequest.builder()
@@ -115,11 +110,16 @@ public class ProductPaymentServiceImpl implements ProductPaymentService {
                 return;
             }
 
-            if (payment.getAdditionalInfo() == null || payment.getAdditionalInfo().getItems() == null) {
+            if (payment.getOrder() == null || payment.getOrder().getId() == null) {
                 return;
             }
 
-            for (PaymentItem item : payment.getAdditionalInfo().getItems()) {
+            MerchantOrder order = new MerchantOrderClient().get(payment.getOrder().getId());
+            if (order.getItems() == null) {
+                return;
+            }
+
+            for (MerchantOrderItem item : order.getItems()) {
                 if (item.getId() == null || item.getQuantity() == null) {
                     continue;
                 }
