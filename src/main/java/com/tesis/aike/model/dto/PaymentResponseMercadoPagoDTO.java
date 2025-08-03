@@ -10,7 +10,6 @@ public class PaymentResponseMercadoPagoDTO {
     private String status;
     private String detail;
 
-
     public String getPaymentId() {
         return paymentId;
     }
