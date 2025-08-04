@@ -61,12 +61,26 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/login-google")
-    public ResponseEntity<?> loginGoogle(@RequestBody Map<String, String> body) {
+    @PostMapping("/login-google-web")
+    public ResponseEntity<?> loginGoogleWeb(@RequestBody Map<String, String> body) {
         try {
             String idToken = body.get("idToken");
-            return ResponseEntity.ok(authService.loginGoogle(idToken));
+            return ResponseEntity.ok(authService.loginGoogleWeb(idToken));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("error", "Token de Google inválido"));
+        }
+    }
+
+    @PostMapping("/login-google")
+    public ResponseEntity<?> loginGoogleAPK(@RequestBody Map<String, String> body) {
+        try {
+            String idToken = body.get("idToken");
+            return ResponseEntity.ok(authService.loginGoogleAPK(idToken));
         } catch (Exception e) {
             return ResponseEntity.status(401).body(Map.of("error", "Token de Google inválido"));
         }
     }}
+
+
+}
+
