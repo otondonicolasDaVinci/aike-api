@@ -29,6 +29,8 @@ public class AikeSecurity {
                         .requestMatchers(
                                 "/auth/login",
                                 "/auth/login-google",
+                                "/auth/login-google-apk",
+                                "/auth/login-google-web",
                                 "/auth/refresh",
                                 "/health"
                         ).permitAll()
