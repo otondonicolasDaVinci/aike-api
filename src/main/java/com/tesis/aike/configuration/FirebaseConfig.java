@@ -37,20 +37,7 @@ public class FirebaseConfig {
             FirebaseApp.initializeApp(options);
         } catch (IOException e) {
             Logger.getLogger(FirebaseConfig.class.getName()).severe("Error initializing Firebase: " + e.getMessage());
-import org.springframework.context.annotation.Configuration;
-
-import java.io.IOException;
-
-@Configuration
-public class FirebaseConfig {
-    @PostConstruct
-    public void init() throws IOException {
-        if (FirebaseApp.getApps().isEmpty()) {
-            FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.getApplicationDefault())
-                    .build();
-            FirebaseApp.initializeApp(options);
-
         }
     }
 }
+
