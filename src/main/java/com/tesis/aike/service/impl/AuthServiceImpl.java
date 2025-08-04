@@ -1,6 +1,6 @@
 package com.tesis.aike.service.impl;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.firebase.auth.FirebaseToken;
 import com.tesis.aike.helper.mapper.UserMapper;
 import com.tesis.aike.model.dto.RoleDTO;
 import com.tesis.aike.model.dto.UserDTO;
@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -74,10 +73,10 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public Map<String, Object> loginGoogle(String idToken) {
         log.info("Iniciando proceso de login con Google.");
-        GoogleIdToken.Payload payload;
+        FirebaseToken firebaseToken;
         try {
-            payload = googleTokenVerifierService.verify(idToken);
-            if (payload == null) {
+            firebaseToken = googleTokenVerifierService.verify(idToken);
+            if (firebaseToken == null) {
                 log.error("La verificación del token de Google ha fallado.");
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "ID token inválido");
             }
@@ -86,8 +85,8 @@ public class AuthServiceImpl implements AuthService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al verificar el token de Google.");
         }
 
-        String email = payload.getEmail();
-        String name = (String) payload.get("name");
+        String email = firebaseToken.getEmail();
+        String name = firebaseToken.getName();
         log.info("Token de Google verificado para el email: {}", email);
 
         UsersEntity user = usersRepo.findByEmail(email).orElseGet(() -> {
