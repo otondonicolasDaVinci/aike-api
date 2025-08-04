@@ -13,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
+import java.util.logging.Logger;
 
 @Configuration
 @Slf4j
@@ -44,7 +45,7 @@ public class FirebaseConfig {
                     .build();
             FirebaseApp.initializeApp(options);
         } catch (IOException e) {
-            log.warn("Skipping Firebase initialization: {}", e.getMessage());
+            Logger.getLogger(FirebaseConfig.class.getName()).warning("Skipping Firebase initialization: " + e.getMessage());
         }
     }
 }
