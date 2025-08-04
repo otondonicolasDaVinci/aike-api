@@ -79,8 +79,6 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(401).body(Map.of("error", "Token de Google inválido"));
         }
-    }}
-
-
+    }
 }
 
