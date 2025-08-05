@@ -3,5 +3,5 @@ package com.tesis.aike.service;
 import java.util.List;
 
 public interface TourService {
-    List<String> getToursForCabin(String cabinName);
+    List<String> getAvailableTours();
 }

@@ -33,7 +33,7 @@ public class QueryDetector {
     }
 
     public static boolean isTourQuery(String message) {
-        return containsAny(message, ConstantValues.QueryKeywords.TOURS);
+        return containsAny(message, ConstantValues.QueryKeywords.TOURS_AND_ACTIVITIES);
     }
 
     private static boolean containsAny(String text, String[] keywords) {
