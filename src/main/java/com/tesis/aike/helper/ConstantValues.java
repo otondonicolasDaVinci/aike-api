@@ -42,9 +42,47 @@ public class ConstantValues {
 
         // Información de recorridos turísticos
         public static final String TOURS_TEMPLATE = "Estos son los recorridos recomendados para la cabaña %s:\n%s";
-        public static final String CONTEXT_TOURS_PROMPT = "Contexto sobre recorridos turísticos:\n%s\n\nPregunta del usuario: \"%s\"\n\nInstrucción: Responde utilizando sólo la información del contexto.";
         public static final String NO_TOURS = "No hay recorridos turísticos registrados para tu cabaña.";
         public static final String ERROR_TOURS = "Lo siento, hubo un problema al obtener los recorridos.";
+
+        public static final String CONTEXT_TOURS_PROMPT = """
+        Contexto sobre los recorridos turísticos y actividades disponibles cerca de la ubicación (Ñorquín, Neuquén):
+        %s
+
+        Pregunta o solicitud del usuario: "%s"
+
+        Instrucción: Eres Aike, un asistente y guía turístico experto en la Patagonia.
+        1. Lee la solicitud del usuario para entender qué tipo of actividad busca y por cuánto tiempo (ej: "un día", "algo tranquilo", "aventura").
+        2. Usando el contexto de los tours disponibles, crea una recomendación o un itinerario breve y atractivo.
+        3. Si el usuario pide un plan para un día, puedes combinar una o dos actividades que sean lógicas geográficamente o por tipo de actividad.
+        4. Si el usuario solo pide recomendaciones generales, preséntale las opciones de forma amigable.
+        5. Basa tu respuesta ÚNICAMENTE en el contexto proporcionado. No inventes lugares, distancias ni precios.
+        """;
+
+        public static final String CONTEXT_CABINS_RECOMMENDATION_PROMPT = """
+        Contexto de la base de datos sobre cabañas disponibles y su capacidad máxima:
+        %s
+
+        Pregunta original del usuario: "%s"
+
+        Instrucción: Tu tarea es actuar como un recepcionista experto.
+        1. Lee la pregunta del usuario para identificar cuántas personas son (ej. "somos dos", "para 4", "una pareja").
+        2. Basado en ese número, revisa el contexto y recomienda la cabaña más adecuada. Si varias cumplen, puedes mencionarlas.
+        3. Si el usuario no especifica un número de personas, simplemente lista las cabañas disponibles de forma amigable.
+        4. Basa tu respuesta ÚNICAMENTE en el contexto proporcionado. No inventes disponibilidad ni detalles.
+        """;
+
+        public static final String GENERAL_CONTEXT_PROMPT = """
+        Contexto sobre las cabañas disponibles en "Cabañas Aike" y sus capacidades:
+        %s
+
+        Pregunta del usuario: "%s"
+
+        Instrucción: Eres el asistente de "Cabañas Aike". Tu tarea es analizar la pregunta del usuario y responderla de la mejor manera posible usando el contexto proporcionado.
+        1. Si el usuario pregunta por disponibilidad o pide una recomendación (ej: "cabañas para 2 personas", "¿qué tenés libre?"), responde usando la información del contexto. Recomienda la mejor opción si especifican un número de personas.
+        2. Si la pregunta no se puede responder con el contexto (ej: "¿cuál es el clima en Ushuaia?"), responde amablemente que solo puedes dar información sobre la disponibilidad, reservas y servicios de Cabañas Aike.
+        Sé siempre conversacional y servicial.
+        """;
     }
 
     public static class ReservationService {
@@ -67,6 +105,13 @@ public class ConstantValues {
                 "qué cabañas hay", "consultar cabañas", "cabañas",
                 "cabañas disponibles para reservar", "cabañas disponibles para alquilar",
                 "cabañas disponibles para arrendar", "cabañas disponibles para hospedarse"
+        };
+
+        public static final String[] PRODUCTS = {"productos", "tienda", "que venden", "comprar", "chocolates"};
+        public static final String[] TOURS_AND_ACTIVITIES = {
+                "que puedo hacer", "que hay para hacer", "actividades", "recorridos",
+                "lugares para visitar", "lugares recomendados", "recomendas", "atracciones",
+                "tour de 1 dia", "tour de un dia", "itinerario", "excursiones", "paseos"
         };
 
         public static final String[] USER_RESERVATIONS = {
@@ -111,11 +156,8 @@ public class ConstantValues {
                 "dni de", "correo de", "email de", "número de documento de"
         };
 
-        public static final String[] PRODUCTS = {"productos", "tienda", "que venden", "comprar"};
-
         public static final String[] MY_CABIN = {"mi cabaña", "cabaña que reservé", "información de la cabaña"};
 
-        public static final String[] TOURS = {"recorridos", "tours", "actividades", "atracciones"};
     }
 
     public static class Security {
@@ -134,4 +176,5 @@ public class ConstantValues {
         public static final String ERROR_FETCH_PRODUCTS = "Error al obtener información de productos: {}";
         public static final String ERROR_FETCH_TOURS = "Error al obtener información de tours: {}";
     }
+
 }
