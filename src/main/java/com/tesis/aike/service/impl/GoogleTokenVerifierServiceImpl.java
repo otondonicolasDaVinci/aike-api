@@ -22,7 +22,7 @@ public class GoogleTokenVerifierServiceImpl implements GoogleTokenVerifierServic
         var transport = GoogleNetHttpTransport.newTrustedTransport();
         var jsonFactory = GsonFactory.getDefaultInstance();
 
-        this.verifier = new GoogleIdTokenVerifier.Builder(new GooglePublicKeysManager(transport, jsonFactory))
+        this.verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
                 .setAudience(Collections.singletonList(clientId))
                 .build();
     }
