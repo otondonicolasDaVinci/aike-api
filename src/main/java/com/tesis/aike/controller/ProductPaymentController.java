@@ -29,10 +29,8 @@ public class ProductPaymentController {
     public ResponseEntity<Void> handleWebhook(@RequestBody String rawBody) {
         try {
             Map<?, ?> body = new ObjectMapper().readValue(rawBody, Map.class);
-            if ("payment".equalsIgnoreCase((String) body.get("type"))) {
-                Long paymentId = Long.valueOf(((Map<?, ?>) body.get("data")).get("id").toString());
-                paymentService.processWebhook(paymentId);
-            }
+            Long paymentId = Long.valueOf(((Map<?, ?>) body.get("data")).get("id").toString());
+            paymentService.processWebhook(paymentId);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             e.printStackTrace();
