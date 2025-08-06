@@ -48,6 +48,7 @@ public class AikeSecurity {
                         .requestMatchers(HttpMethod.GET, "/users/{id}").hasAnyRole("CLIENT", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/users/{id}").hasAnyRole("CLIENT", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/reservations/user/{userId}").hasAnyRole("CLIENT", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/reservations/cabin/{cabinId}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products").permitAll()
                         .requestMatchers(HttpMethod.POST, "/reservations").hasRole("CLIENT")
 

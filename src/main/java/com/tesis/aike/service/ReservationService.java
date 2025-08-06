@@ -11,6 +11,7 @@ public interface ReservationService {
     void delete(Long id);
     ReservationDTO findById(Long id);
     List<ReservationDTO> findByUserId(Long userId);
+    List<ReservationDTO> findByCabinId(Long cabinId);
     List<ReservationDTO> findAll();
     void updateStatus(Long id, String status);
     boolean hasActiveReservation(Long userId);
