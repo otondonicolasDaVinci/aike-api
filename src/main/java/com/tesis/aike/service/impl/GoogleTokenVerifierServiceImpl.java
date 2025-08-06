@@ -5,9 +5,11 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
+import org.springframework.beans.factory.annotation.Value;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseToken;
 import com.tesis.aike.service.GoogleTokenVerifierService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -27,8 +29,18 @@ public class GoogleTokenVerifierServiceImpl implements GoogleTokenVerifierServic
                 .build();
     }
 
+
     @Override
-    public GoogleIdToken.Payload verify(String idTokenString) {
+    public FirebaseToken verifyWebToken(String idTokenString) {
+        try {
+            return FirebaseAuth.getInstance().verifyIdToken(idTokenString);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Override
+    public GoogleIdToken.Payload verifyApkToken(String idTokenString) {
         try {
             GoogleIdToken idToken = verifier.verify(idTokenString);
             return idToken != null ? idToken.getPayload() : null;
