@@ -62,7 +62,7 @@ public class ReservationServiceImpl implements ReservationService {
                     ConstantValues.ReservationService.INVALID_DATA);
         }
 
-        validateAvailability(dto.getCabin().getId(), dto.getStartDate(), dto.getEndDate());
+        validateAvailability(dto.getCabin().getId(), dto.getStartDate(), dto.getEndDate(), null);
         ReservationsEntity saved = reservationsRepository.save(mapper.toEntity(dto));
         return toDTOFull(saved);
     }
@@ -70,10 +70,11 @@ public class ReservationServiceImpl implements ReservationService {
     public ReservationDTO update(Long id, ReservationDTO dto) {
         ReservationsEntity entity = reservationsRepository.findById(Math.toIntExact(id)).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, ConstantValues.ReservationService.NOT_FOUND));
-        validateAvailability(entity.getCabinId(), dto.getStartDate(), dto.getEndDate());
+        validateAvailability(entity.getCabinId(), dto.getStartDate(), dto.getEndDate(), id);
         entity.setStartDate(dto.getStartDate());
         entity.setEndDate(dto.getEndDate());
         entity.setStatus(dto.getStatus());
+        reservationsRepository.save(entity);
         return toDTOFull(entity);
     }
 
@@ -95,12 +96,14 @@ public class ReservationServiceImpl implements ReservationService {
         return reservationsRepository.findByCabinId(cabinId).stream().map(this::toDTOFull).toList();
     }
 
-    private void validateAvailability(Long cabinId, LocalDate start, LocalDate end) {
+    private void validateAvailability(Long cabinId, LocalDate start, LocalDate end, Long reservationId) {
         List<ReservationsEntity> existing = reservationsRepository.findByCabinId(cabinId);
-        boolean overlaps = existing.stream().anyMatch(r ->
-                !r.getEndDate().isBefore(start) && !r.getStartDate().isAfter(end));
+        boolean overlaps = existing.stream()
+                .filter(r -> reservationId == null || !r.getId().equals(reservationId))
+                .anyMatch(r -> !r.getEndDate().isBefore(start) && !r.getStartDate().isAfter(end));
         if (overlaps) {
             List<Map<String, LocalDate>> reservations = existing.stream()
+                    .filter(r -> reservationId == null || !r.getId().equals(reservationId))
                     .map(r -> Map.of("startDate", r.getStartDate(), "endDate", r.getEndDate()))
                     .toList();
             throw new CabinAlreadyReservedException(reservations);
