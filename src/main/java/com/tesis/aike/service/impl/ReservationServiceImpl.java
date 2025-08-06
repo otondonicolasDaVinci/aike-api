@@ -1,5 +1,6 @@
 package com.tesis.aike.service.impl;
 
+import com.tesis.aike.exception.CabinAlreadyReservedException;
 import com.tesis.aike.helper.ConstantValues;
 import com.tesis.aike.helper.mapper.ReservationMapper;
 import com.tesis.aike.model.dto.CabinDTO;
@@ -18,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -88,11 +90,21 @@ public class ReservationServiceImpl implements ReservationService {
         return reservationsRepository.findByUserId(userId).stream().map(this::toDTOFull).toList();
     }
 
+    @Override
+    public List<ReservationDTO> findByCabinId(Long cabinId) {
+        return reservationsRepository.findByCabinId(cabinId).stream().map(this::toDTOFull).toList();
+    }
+
     private void validateAvailability(Long cabinId, LocalDate start, LocalDate end) {
-        boolean overlaps = reservationsRepository.existsByCabinIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
-                cabinId, end, start);
-        if (overlaps) throw new ResponseStatusException(
-                HttpStatus.CONFLICT, ConstantValues.ReservationService.CABIN_NOT_AVAILABLE);
+        List<ReservationsEntity> existing = reservationsRepository.findByCabinId(cabinId);
+        boolean overlaps = existing.stream().anyMatch(r ->
+                !r.getEndDate().isBefore(start) && !r.getStartDate().isAfter(end));
+        if (overlaps) {
+            List<Map<String, LocalDate>> reservations = existing.stream()
+                    .map(r -> Map.of("startDate", r.getStartDate(), "endDate", r.getEndDate()))
+                    .toList();
+            throw new CabinAlreadyReservedException(reservations);
+        }
     }
 
     private ReservationDTO toDTOFull(ReservationsEntity entity) {

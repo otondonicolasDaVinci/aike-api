@@ -87,7 +87,7 @@ public class ConstantValues {
 
     public static class ReservationService {
         public static final String NOT_FOUND = "Reserva no encontrada";
-        public static final String CABIN_NOT_AVAILABLE = "La cabaña no está disponible en las fechas solicitadas";
+        public static final String CABIN_NOT_AVAILABLE = "La cabaña ya se encuentra reservada";
         public static final String INVALID_DATA = "Datos de reserva inválidos";
     }
 
